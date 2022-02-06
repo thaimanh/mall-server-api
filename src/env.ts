@@ -1,6 +1,12 @@
 import * as dotenv from "dotenv";
 import * as path from "path";
-import { getOsEnv, normalizePort, toBool, toNumber } from "./lib/env";
+import {
+  getOsEnv,
+  getOsPath,
+  getOsPaths,
+  normalizePort,
+  toBool,
+} from "./lib/env";
 
 /**
  * Load .env file or for tests the .env.test file.
@@ -27,12 +33,15 @@ export const env = {
     routePrefix: getOsEnv("APP_ROUTE_PREFIX"),
     port: normalizePort(process.env.PORT || getOsEnv("APP_PORT")),
     dirs: {
-      migrations: getOsEnv("TYPEORM_MIGRATIONS"),
-      migrationsDir: getOsEnv("TYPEORM_MIGRATIONS_DIR"),
-      entities: getOsEnv("TYPEORM_ENTITIES"),
-      entitiesDir: getOsEnv("TYPEORM_ENTITIES_DIR"),
-      controllers: getOsEnv("CONTROLLERS"),
-      middlewares: getOsEnv("MIDDLEWARES"),
+      migrations: getOsPaths("TYPEORM_MIGRATIONS"),
+      migrationsDir: getOsPath("TYPEORM_MIGRATIONS_DIR"),
+      entities: getOsPaths("TYPEORM_ENTITIES"),
+      entitiesDir: getOsPath("TYPEORM_ENTITIES_DIR"),
+      controllers: getOsPaths("CONTROLLERS"),
+      middlewares: getOsPaths("MIDDLEWARES"),
+      interceptors: getOsPaths("INTERCEPTORS"),
+      subscribers: getOsPaths("SUBSCRIBERS"),
+      resolvers: getOsPaths("RESOLVERS"),
     },
   },
   db: {

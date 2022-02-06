@@ -27,13 +27,13 @@ export function getOsPath(key: string): string {
   return getPath(getOsEnv(key));
 }
 
-// export function getOsPaths(key: string): string[] {
-//     return getPaths(getOsEnvArray(key));
-// }
+export function getOsPaths(key: string): string[] {
+  return getPaths(getOsEnvArray(key));
+}
 
-// export function getOsEnvArray(key: string, delimiter: string = ','): string[] {
-//     return process.env[key] && process.env[key].split(delimiter) || [];
-// }
+export function getOsEnvArray(key: string, delimiter: string = ","): string[] {
+  return (process.env[key] && process.env[key].split(delimiter)) || [];
+}
 
 export function toNumber(value: string): number {
   return parseInt(value, 10);
