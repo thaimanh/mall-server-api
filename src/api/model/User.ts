@@ -45,7 +45,7 @@ export class User {
   public birthday: string;
 
   @IsNotEmpty()
-  @Column()
+  @Column({ unique: true })
   public mail: string;
 
   @Column()

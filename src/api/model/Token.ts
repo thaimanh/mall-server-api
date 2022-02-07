@@ -30,7 +30,7 @@ export class Token {
   public status: number;
 
   @IsNotEmpty()
-  @Column({ name: "expiresAt", nullable: false })
+  @Column({ name: "expires_at", nullable: false })
   public expiresAt: Date;
 
   @CreateDateColumn({

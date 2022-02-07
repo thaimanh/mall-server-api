@@ -28,6 +28,8 @@ export const env = {
   isDevelopment: process.env.NODE_ENV === "development",
   app: {
     secretJwt: getOsEnv("SECRET_JWT"),
+    expiresIn: getOsEnv("JWT_EXPIRES_IN"),
+    expiresInAdmin: getOsEnv("JWT_EXPIRES_IN_ADMIN"),
     name: getOsEnv("APP_NAME"),
     host: getOsEnv("APP_HOST"),
     schema: getOsEnv("APP_SCHEMA"),

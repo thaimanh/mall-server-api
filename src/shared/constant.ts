@@ -1,4 +1,5 @@
 import { dayToMilliseconds } from "./dateUtil";
+import { env } from "../env";
 
 export interface IObject<T = unknown> {
   [key: string]: T;
@@ -10,17 +11,9 @@ export const MEMBER_TYPE = {
 } as const;
 
 // common
-export const JWT_EXPIRES_IN = dayToMilliseconds(
-  Number(process.env.JWT_EXPIRES_IN)
-);
+export const JWT_EXPIRES_IN = dayToMilliseconds(Number(env.app.expiresIn));
 export const JWT_EXPIRES_IN_ADMIN = dayToMilliseconds(
-  Number(process.env.JWT_EXPIRES_IN_ADMIN)
-);
-export const JWT_EXPIRES_IN_SALON = dayToMilliseconds(
-  Number(process.env.JWT_EXPIRES_IN_SALON)
-);
-export const JWT_EXPIRES_IN_STYLIST = dayToMilliseconds(
-  Number(process.env.JWT_EXPIRES_IN_STYLIST)
+  Number(env.app.expiresInAdmin)
 );
 
 export const TOKEN_STATUS = {

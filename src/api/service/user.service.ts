@@ -6,6 +6,7 @@ import * as uuid from "uuid";
 import { BadRequestError, InternalServerError } from "routing-controllers";
 import { compareHash } from "../../shared/function";
 import { TokenRepository } from "../repositories/Token";
+import { MEMBER_TYPE } from "../../shared/constant";
 
 @Service()
 export class UserService {
@@ -21,11 +22,12 @@ export class UserService {
       const user = await this.userRepository.save(body);
       return user;
     } catch (error) {
+      console.log(error);
       throw new InternalServerError("System error");
     }
   }
 
-  public async loginUser(body: User) {
+  public async loginUser(body: User): Promise<{ accessToken: string }> {
     const user: User = await this.userRepository.findOneOrFail({
       mail: String(body.mail).trim().toLowerCase(),
     });
@@ -35,6 +37,7 @@ export class UserService {
     if (!compareHash(body.password, user.password)) {
       throw new BadRequestError("Login Failed");
     }
+    return this.tokenRepository.newToken(user.userId, MEMBER_TYPE.USER);
   }
 
   public logoutUser() {}

@@ -23,8 +23,7 @@ import { Type } from "class-transformer";
 import { User } from "../model/User";
 
 import { UserService } from "../service/user.service";
-@JsonController("/users")
-@OpenAPI({ security: [{ basicAuth: [] }] })
+
 class BaseUser {
   @IsNotEmpty()
   public surname: string;
@@ -43,22 +42,49 @@ class BaseUser {
   public gender: number;
 }
 
-class CreateUserBody extends BaseUser {
+class CreateUserBody {
+  @IsNotEmpty()
+  public password: string;
+  @IsNotEmpty()
+  public surname: string;
+
+  @IsNotEmpty()
+  public lastname: string;
+
+  @IsNotEmpty()
+  @IsEmail()
+  public mail: string;
+
+  @IsNotEmpty()
+  public birthday: string;
+
+  @IsNumber()
+  public gender: number;
+}
+
+class LoginUserBody {
+  @IsNotEmpty()
+  @IsEmail()
+  public mail: string;
   @IsNotEmpty()
   public password: string;
 }
-class ResponseUser extends BaseUser {}
-@OpenAPI({ security: [{ basicAuth: [] }] })
+@OpenAPI({})
 @Controller("/user")
 export class UserController {
   constructor(private userService: UserService) {}
   @Post("/auth/login")
-  loginUser() {
-    return "Hello World";
+  loginUser(@Body() body: LoginUserBody): Promise<{ accessToken: string }> {
+    const user = new User();
+    user.mail = body.mail;
+    user.password = body.password;
+
+    return this.userService.loginUser(user);
   }
 
   @Post("/auth/register")
   public async registerUser(@Body() body: CreateUserBody): Promise<User> {
+    console.log(body.mail);
     const validationRes: Array<ValidationError> = await validate(body);
     if (validationRes.length > 0) throw validationRes;
     const user = new User();

@@ -9,7 +9,7 @@ import {
   TOKEN_STATUS,
 } from "../../shared/constant";
 import { hashMd5 } from "../../shared/function";
-import uuid from "uuid";
+import * as uuid from "uuid";
 
 @EntityRepository(Token)
 export class TokenRepository extends Repository<Token> {
@@ -54,11 +54,10 @@ export class TokenRepository extends Repository<Token> {
     let service = this.getService(memberType);
     const token = await service.getJwt({
       memberCd: memberCd,
-      expiresIn: expiresIn,
     });
     const expriesAt = new Date(Date.now() + expiresIn);
     const tokenHash = await hashMd5(token);
-    const tokenData = await this.create({
+    const tokenData = this.create({
       token: tokenHash,
       expiresAt: expriesAt,
       memberType,
@@ -68,15 +67,8 @@ export class TokenRepository extends Repository<Token> {
       createdAt: new Date(),
       updatedAt: new Date(),
     });
-    // let tokenData: Token = new Token();
-    // tokenData.memberType = memberType;
-    // tokenData.expiresAt = expriesAt;
-    // tokenData.memberCd = memberCd;
-    // tokenData.serial = uuid.v1();
-    // tokenData.token = tokenHash;
-    // tokenData.createdAt = new Date();
-    // tokenData.updatedAt = new Date();
     const tokenSave = await this.save(tokenData);
+    return { accessToken: tokenSave.token };
   }
 
   public async verifyToken() {}
