@@ -3,15 +3,16 @@ import { UserRepository } from "../repositories/User";
 import { OrmRepository } from "typeorm-typedi-extensions";
 import { User } from "../model/User";
 import * as uuid from "uuid";
-import {
-  BadRequestError,
-  InternalServerError,
-} from "routing-controllers";
+import { BadRequestError, InternalServerError } from "routing-controllers";
 import { compareHash } from "../../shared/function";
+import { TokenRepository } from "../repositories/Token";
 
 @Service()
 export class UserService {
-  constructor(@OrmRepository() private userRepository: UserRepository) {}
+  constructor(
+    @OrmRepository() private userRepository: UserRepository,
+    @OrmRepository() private tokenRepository: TokenRepository
+  ) {}
   public async registerUser(body: User): Promise<User> {
     try {
       body.userId = uuid.v1();

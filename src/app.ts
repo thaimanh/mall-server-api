@@ -15,7 +15,7 @@ async function init() {
   // Express loader
   const app = expressLoader();
 
-  // Swagger loader
+  // Swagger loaders
   swaggerLoader(app);
 }
 
