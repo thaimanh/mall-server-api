@@ -24,7 +24,7 @@ export class Admin {
   }
 
   @PrimaryColumn({ name: "admin_id", nullable: false })
-  public userId: string;
+  public adminId: string;
 
   @IsNotEmpty()
   @Column({ name: "surname", nullable: false })

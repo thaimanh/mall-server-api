@@ -1,6 +1,6 @@
 import { verify } from "jsonwebtoken";
 import { BadRequestError } from "routing-controllers";
-import { EntityRepository, Repository } from "typeorm";
+import { EntityRepository, getCustomRepository, Repository } from "typeorm";
 import * as uuid from "uuid";
 import { env } from "../../env";
 import {
@@ -131,12 +131,12 @@ export class TokenRepository extends Repository<Token> {
   public getRepositoryByMembertype(memberType: number) {
     const obj: { [id: string]: { codeName: string; repo: Repository<any> } } = {
       [MEMBER_TYPE.USER.toString()]: {
-        codeName: "user_id",
-        repo: new UserRepository(),
+        codeName: "userId",
+        repo: getCustomRepository(UserRepository),
       },
       [MEMBER_TYPE.ADMIN.toString()]: {
-        codeName: "admin_id",
-        repo: new AdminRepository(),
+        codeName: "adminId",
+        repo: getCustomRepository(AdminRepository),
       },
     };
     return obj[memberType];
