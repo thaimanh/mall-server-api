@@ -1,16 +1,25 @@
+import { verify } from "jsonwebtoken";
+import { BadRequestError } from "routing-controllers";
 import { EntityRepository, Repository } from "typeorm";
-import { Token } from "../model/Token";
-import { JwtService } from "../../shared/jwtService";
+import * as uuid from "uuid";
 import { env } from "../../env";
 import {
+  IObject,
   JWT_EXPIRES_IN,
   JWT_EXPIRES_IN_ADMIN,
   MEMBER_TYPE,
   TOKEN_STATUS,
 } from "../../shared/constant";
 import { hashMd5 } from "../../shared/function";
-import * as uuid from "uuid";
+import { JwtService } from "../../shared/jwtService";
+import { Token } from "../models/Token";
+import { AdminRepository } from "./Admin";
+import { UserRepository } from "./User";
 
+interface VerifyTokenResult {
+  memberType: number;
+  member: IObject;
+}
 @EntityRepository(Token)
 export class TokenRepository extends Repository<Token> {
   private jwtServiceUser: JwtService;
@@ -67,9 +76,69 @@ export class TokenRepository extends Repository<Token> {
       createdAt: new Date(),
       updatedAt: new Date(),
     });
-    const tokenSave = await this.save(tokenData);
-    return { accessToken: tokenSave.token };
+    await this.save(tokenData);
+    return { accessToken: token };
   }
 
-  public async verifyToken() {}
+  public async verifyToken(token: string, memberType: number) {
+    try {
+      const secret = env.app.secretJwt;
+      if (!verify(token, secret)) {
+        throw new BadRequestError("Token invalid");
+      }
+
+      const item = await this.getService(memberType).decodeJwt(token);
+      const tokenHash = await hashMd5(token);
+      const tokenData = await this.findOne({
+        where: {
+          memberCd: item.memberCd,
+          memberType: memberType,
+          // token: tokenHash,
+        },
+      });
+
+      if (
+        tokenData &&
+        tokenData.status === TOKEN_STATUS.VALID &&
+        new Date(tokenData.expiresAt).getTime() > Date.now()
+      ) {
+        const { codeName, repo } = this.getRepositoryByMembertype(memberType);
+        if (!codeName && !repo) {
+          throw new BadRequestError("Member type not found");
+        }
+
+        const memberData = await repo.find({
+          where: {
+            [codeName]: tokenData.memberCd,
+          },
+        });
+
+        if (!memberData) {
+          throw new BadRequestError(
+            `Not found member with code: '${tokenData.memberCd}' - type: '${tokenData.memberType}'`
+          );
+        }
+
+        return { memberType: tokenData.memberType, memberData };
+      }
+      throw new BadRequestError("Invalid token");
+    } catch (error) {
+      console.log(error);
+      return null;
+    }
+  }
+
+  public getRepositoryByMembertype(memberType: number) {
+    const obj: { [id: string]: { codeName: string; repo: Repository<any> } } = {
+      [MEMBER_TYPE.USER.toString()]: {
+        codeName: "user_id",
+        repo: new UserRepository(),
+      },
+      [MEMBER_TYPE.ADMIN.toString()]: {
+        codeName: "admin_id",
+        repo: new AdminRepository(),
+      },
+    };
+    return obj[memberType];
+  }
 }

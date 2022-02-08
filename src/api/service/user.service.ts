@@ -1,7 +1,7 @@
 import { Service } from "typeDI";
 import { UserRepository } from "../repositories/User";
 import { OrmRepository } from "typeorm-typedi-extensions";
-import { User } from "../model/User";
+import { User } from "../models/User";
 import * as uuid from "uuid";
 import { BadRequestError, InternalServerError } from "routing-controllers";
 import { compareHash } from "../../shared/function";
@@ -17,8 +17,6 @@ export class UserService {
   public async registerUser(body: User): Promise<User> {
     try {
       body.userId = uuid.v1();
-      body.createdAt = new Date();
-      body.updatedAt = new Date();
       const user = await this.userRepository.save(body);
       return user;
     } catch (error) {
@@ -45,6 +43,6 @@ export class UserService {
   public getDetailUser() {}
 
   public getAllUser() {
-    return this.userRepository.find();
+    return this.tokenRepository.find();
   }
 }

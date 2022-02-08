@@ -1,9 +1,9 @@
 import "reflect-metadata";
 import { env } from "./env";
 import { expressLoader } from "./loaders/expressLoader";
-import { typeormLoader } from "./loaders/typeormLoader";
-import { swaggerLoader } from "./loaders/swaggerLoader";
 import { iocLoader } from "./loaders/iocLoader";
+import { swaggerLoader } from "./loaders/swaggerLoader";
+import { typeormLoader } from "./loaders/typeormLoader";
 
 async function init() {
   // IOC loader

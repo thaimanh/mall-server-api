@@ -7,12 +7,11 @@ import {
   PrimaryColumn,
   UpdateDateColumn,
   BeforeInsert,
-  PrimaryGeneratedColumn,
 } from "typeorm";
 import bcrypt from "bcrypt";
 
-@Entity("m_user")
-export class User {
+@Entity("m_admin")
+export class Admin {
   public static hashPassword(password: string): Promise<string> {
     return new Promise((resolve, reject) => {
       bcrypt.hash(password, 10, (err, hash) => {
@@ -24,7 +23,7 @@ export class User {
     });
   }
 
-  @PrimaryColumn({ name: "user_id", nullable: false })
+  @PrimaryColumn({ name: "admin_id", nullable: false })
   public userId: string;
 
   @IsNotEmpty()
@@ -48,8 +47,8 @@ export class User {
   @Column({ unique: true })
   public mail: string;
 
-  @Column()
-  public gender?: number;
+  @Column({ nullable: true })
+  public gender: number;
 
   @CreateDateColumn({
     name: "created_at",
@@ -67,6 +66,6 @@ export class User {
 
   @BeforeInsert()
   public async hashPassword(): Promise<void> {
-    this.password = await User.hashPassword(this.password);
+    this.password = await Admin.hashPassword(this.password);
   }
 }

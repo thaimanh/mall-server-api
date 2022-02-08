@@ -3,8 +3,8 @@ import { env } from "../env";
 import morgan from "morgan";
 import helmet from "helmet";
 import express from "express";
-import { UserController } from "../api/controller/user.controller";
-
+import { UserController } from "../api/controllers/user.controller";
+import { authorizationChecker } from "../api/auth/authorizationChecker";
 export const expressLoader = () => {
   let app = express();
   useExpressServer(app, {
@@ -13,6 +13,7 @@ export const expressLoader = () => {
     routePrefix: env.app.routePrefix,
     defaultErrorHandler: false,
     controllers: [UserController],
+    authorizationChecker,
   });
 
   // set log request

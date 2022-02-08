@@ -4,6 +4,7 @@ import {
   routingControllersToSpec,
 } from "routing-controllers-openapi";
 import {
+  Authorized,
   Body,
   Controller,
   Get,
@@ -15,12 +16,10 @@ import {
   IsEmail,
   IsNotEmpty,
   IsNumber,
-  Min,
   validate,
   ValidationError,
 } from "class-validator";
-import { Type } from "class-transformer";
-import { User } from "../model/User";
+import { User } from "../models/User";
 
 import { UserService } from "../service/user.service";
 
@@ -42,24 +41,9 @@ class BaseUser {
   public gender: number;
 }
 
-class CreateUserBody {
+class CreateUserBody extends BaseUser {
   @IsNotEmpty()
   public password: string;
-  @IsNotEmpty()
-  public surname: string;
-
-  @IsNotEmpty()
-  public lastname: string;
-
-  @IsNotEmpty()
-  @IsEmail()
-  public mail: string;
-
-  @IsNotEmpty()
-  public birthday: string;
-
-  @IsNumber()
-  public gender: number;
 }
 
 class LoginUserBody {
@@ -69,6 +53,7 @@ class LoginUserBody {
   @IsNotEmpty()
   public password: string;
 }
+
 @OpenAPI({})
 @Controller("/user")
 export class UserController {
@@ -101,6 +86,7 @@ export class UserController {
   @Get("/:id")
   getDetailUser() {}
 
+  @Authorized("authorization")
   @Get("/")
   getUsers() {
     return this.userService.getAllUser();
