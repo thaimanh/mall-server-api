@@ -8,7 +8,10 @@ import { BadRequestError, InternalServerError } from "routing-controllers";
 import { compareHash } from "../../shared/function";
 import { TokenRepository } from "../repositories/Token";
 import { MEMBER_TYPE } from "../../shared/constant";
+import { IResponseCommon } from "../Interface/ResponseCommon";
+import { ILike, Like } from "typeorm";
 
+const USER_PERPAGE = 100;
 @Service()
 export class UserService {
   constructor(
@@ -18,7 +21,7 @@ export class UserService {
   public async registerUser(body: CreateUserBody): Promise<User> {
     const validationRes: Array<ValidationError> = await validate(body);
     if (validationRes.length > 0) throw validationRes;
-    
+
     try {
       const user = await this.userRepository.save(
         this.userRepository.create({
@@ -58,11 +61,39 @@ export class UserService {
     return this.tokenRepository.newToken(user.userId, MEMBER_TYPE.USER);
   }
 
-  public logoutUser() {}
+  // public logoutUser(userId: string) {
+  //   try {
+  //     await this.tokenRepository.save
+  //   } catch (error) {
+  //     console.error(error)
+  //   }
+  //   return { success: true }
+  // },
 
-  public getDetailUser() {}
+  public getDetailUser(userId: string) {}
 
-  public getAllUser() {
-    return this.userRepository.find();
+  public async getAllUser(
+    name?: string,
+    mail?: string,
+    limit?: number,
+    offset?: number
+  ): Promise<IResponseCommon<User[]>> {
+    limit = limit || USER_PERPAGE;
+    offset = offset || 0;
+    const whereCondition = {};
+    if (name) {
+      whereCondition["lastname"] = ILike(`%${name}%`);
+    }
+    if (mail) {
+      whereCondition["mail"] = ILike(`%${mail}%`);
+    }
+
+    const users = await this.userRepository.find({
+      where: { ...whereCondition },
+      skip: offset,
+      take: limit,
+    });
+    const total = await this.userRepository.count({ ...whereCondition });
+    return { result: users, meta: { total, offset, limit } };
   }
 }

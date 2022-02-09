@@ -5,7 +5,7 @@ import morgan from "morgan";
 import { HttpError } from "routing-controllers";
 import { ValidationError } from "class-validator";
 import express from "express";
-import { UserController } from "../api/controllers/user.controller";
+import { UserController } from "../api/controllers/user/user.controller";
 import { authorizationChecker } from "../api/auth/authorizationChecker";
 import StatusCodes from "http-status";
 
