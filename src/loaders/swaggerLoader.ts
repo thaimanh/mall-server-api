@@ -1,17 +1,16 @@
 const { defaultMetadataStorage } = require("class-transformer/cjs/storage");
-import { validationMetadataArrayToSchemas } from "class-validator-jsonschema";
+import { validationMetadatasToSchemas } from "class-validator-jsonschema";
 import { getMetadataArgsStorage } from "routing-controllers";
 import { routingControllersToSpec } from "routing-controllers-openapi";
 import * as swaggerUi from "swagger-ui-express";
 import { UserController } from "../api/controllers/user.controller";
 import express from "express";
-import { getFromContainer, MetadataStorage } from "class-validator";
 
 import { env } from "../env";
+import { authorizationChecker } from "../api/auth/authorizationChecker";
 
 export const swaggerLoader = (expressApp: express.Express) => {
-  const { validationMetadatas } = getFromContainer(MetadataStorage) as any;
-  const schemas = validationMetadataArrayToSchemas(validationMetadatas, {
+  const schemas = validationMetadatasToSchemas({
     classTransformerMetadataStorage: defaultMetadataStorage,
     refPointerPrefix: "#/components/schemas/",
   });
@@ -19,7 +18,7 @@ export const swaggerLoader = (expressApp: express.Express) => {
   const storage = getMetadataArgsStorage();
   const swaggerFile = routingControllersToSpec(
     storage,
-    {},
+    { authorizationChecker },
     {
       components: {
         schemas,

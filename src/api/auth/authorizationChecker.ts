@@ -1,14 +1,17 @@
 import { Action } from "routing-controllers";
-import { MEMBER_TYPE } from "../../shared/constant";
-import { Container } from "typedi";
+import { IObject, MEMBER_TYPE } from "../../shared/constant";
 import { TokenRepository } from "../repositories/Token";
 import { getCustomRepository } from "typeorm";
 
-export async function authorizationChecker(action: Action): Promise<boolean> {
+export async function authorizationChecker(
+  action: Action,
+  role: string[]
+): Promise<boolean> {
   try {
+    const memberType = parseScopesToMemberTypes(role);
     const token = action.request.headers["authorization"];
     const tokenRepository = getCustomRepository(TokenRepository);
-    const result = await tokenRepository.verifyToken(token, MEMBER_TYPE.USER);
+    const result = await tokenRepository.verifyToken(token, memberType[0]);
     if (!result) {
       return false;
     }
@@ -17,4 +20,11 @@ export async function authorizationChecker(action: Action): Promise<boolean> {
     console.log(error);
     return false;
   }
+}
+
+function parseScopesToMemberTypes(scopes: string[]): number[] {
+  return <number[]>scopes
+    .map((s) => s.toUpperCase())
+    .map((s) => s in MEMBER_TYPE && (<IObject>MEMBER_TYPE)[s])
+    .filter(Boolean);
 }

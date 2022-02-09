@@ -65,7 +65,7 @@ export class TokenRepository extends Repository<Token> {
       memberCd: memberCd,
     });
     const expriesAt = new Date(Date.now() + expiresIn);
-    const tokenHash = await hashMd5(token);
+    const tokenHash = hashMd5(token);
     const tokenData = this.create({
       token: tokenHash,
       expiresAt: expriesAt,
@@ -86,14 +86,13 @@ export class TokenRepository extends Repository<Token> {
       if (!verify(token, secret)) {
         throw new BadRequestError("Token invalid");
       }
-
+      const tokenHash = hashMd5(token);
       const item = await this.getService(memberType).decodeJwt(token);
-      const tokenHash = await hashMd5(token);
       const tokenData = await this.findOne({
         where: {
           memberCd: item.memberCd,
           memberType: memberType,
-          // token: tokenHash,
+          token: tokenHash,
         },
       });
 

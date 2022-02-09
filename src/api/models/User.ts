@@ -1,5 +1,5 @@
 import { Exclude } from "class-transformer";
-import { IsNotEmpty } from "class-validator";
+import { IsEmail, IsNotEmpty, IsNumber } from "class-validator";
 import {
   Column,
   CreateDateColumn,
@@ -8,19 +8,15 @@ import {
   UpdateDateColumn,
   BeforeInsert,
 } from "typeorm";
-import bcrypt from "bcrypt";
+import crypto from "crypto";
 
 @Entity("m_user")
 export class User {
-  public static hashPassword(password: string): Promise<string> {
-    return new Promise((resolve, reject) => {
-      bcrypt.hash(password, 10, (err, hash) => {
-        if (err) {
-          return reject(err);
-        }
-        resolve(hash);
-      });
-    });
+  public static hashPassword(str: string, salt?: string): string {
+    return crypto
+      .createHash("md5")
+      .update(String(str || "") + String(salt || ""))
+      .digest("hex");
   }
 
   @PrimaryColumn({ name: "user_id", nullable: false })
@@ -66,6 +62,37 @@ export class User {
 
   @BeforeInsert()
   public async hashPassword(): Promise<void> {
-    this.password = await User.hashPassword(this.password);
+    this.password = User.hashPassword(this.password);
   }
+}
+
+export class BaseUser {
+  @IsNotEmpty()
+  public surname: string;
+
+  @IsNotEmpty()
+  public lastname: string;
+
+  @IsNotEmpty()
+  @IsEmail()
+  public mail: string;
+
+  @IsNotEmpty()
+  public birthday: string;
+
+  @IsNumber()
+  public gender: number;
+}
+
+export class CreateUserBody extends BaseUser {
+  @IsNotEmpty()
+  public password: string;
+}
+
+export class LoginUserBody {
+  @IsNotEmpty()
+  @IsEmail()
+  public mail: string;
+  @IsNotEmpty()
+  public password: string;
 }

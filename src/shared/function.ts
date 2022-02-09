@@ -1,15 +1,14 @@
-import bcrypt from "bcrypt";
-export const compareHash = async (password: string = "", strHash: string) => {
-  const hashed = await hashMd5(password);
+import crypto from "crypto";
+
+export const compareHash = (password: string = "", strHash: string) => {
+  const hashed = hashMd5(password);
+  console.log(hashed, strHash);
   return hashed === strHash;
 };
-export const hashMd5 = (password: string): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    bcrypt.hash(password, 10, (err, hash) => {
-      if (err) {
-        return reject(err);
-      }
-      resolve(hash);
-    });
-  });
+
+export const hashMd5 = (str: string, salt?: string): string => {
+  return crypto
+    .createHash("md5")
+    .update(String(str || "") + String(salt || ""))
+    .digest("hex");
 };

@@ -8,19 +8,15 @@ import {
   UpdateDateColumn,
   BeforeInsert,
 } from "typeorm";
-import bcrypt from "bcrypt";
+import crypto from "crypto";
 
 @Entity("m_admin")
 export class Admin {
-  public static hashPassword(password: string): Promise<string> {
-    return new Promise((resolve, reject) => {
-      bcrypt.hash(password, 10, (err, hash) => {
-        if (err) {
-          return reject(err);
-        }
-        resolve(hash);
-      });
-    });
+  public static hashPassword(str: string, salt?: string): string {
+    return crypto
+      .createHash("md5")
+      .update(String(str || "") + String(salt || ""))
+      .digest("hex");
   }
 
   @PrimaryColumn({ name: "admin_id", nullable: false })
@@ -66,6 +62,6 @@ export class Admin {
 
   @BeforeInsert()
   public async hashPassword(): Promise<void> {
-    this.password = await Admin.hashPassword(this.password);
+    this.password = Admin.hashPassword(this.password);
   }
 }
