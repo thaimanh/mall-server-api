@@ -3,10 +3,11 @@ import { Authorized, Body, Controller, Get, Post } from "routing-controllers";
 import { CreateUserBody, LoginUserBody, User } from "../models/User";
 
 import { UserService } from "../service/user.service";
+import { MEMBER_TYPE } from "src/shared/constant";
 
-@OpenAPI({
-  security: [{ authorization: [] }],
-})
+// @OpenAPI({
+//   security: [{ authorization: [] }],
+// })
 @Controller("/user")
 export class UserController {
   constructor(private userService: UserService) {}
@@ -25,7 +26,7 @@ export class UserController {
   @Get("/:id")
   getDetailUser() {}
 
-  @Authorized(["USER"])
+  @Authorized([MEMBER_TYPE.USER])
   @Get("/")
   getUsers() {
     return this.userService.getAllUser();
