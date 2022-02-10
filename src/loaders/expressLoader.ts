@@ -6,9 +6,9 @@ import { HttpError } from "routing-controllers";
 import { ValidationError } from "class-validator";
 import express from "express";
 import { UserController } from "../api/controllers/user.controller";
-import { authorizationChecker } from "../api/auth/authorizationChecker";
+import { authorizationChecker } from "../auth/authorizationChecker";
 import StatusCodes from "http-status";
-import { currentUserChecker } from "../api/auth/currentUserChecker";
+import { currentUserChecker } from "../auth/currentUserChecker";
 
 export const expressLoader = () => {
   let app = express();

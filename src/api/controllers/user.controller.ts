@@ -11,7 +11,13 @@ import {
   IResponseCommon,
   IResponseSuccess,
 } from "src/api/Interface/ResponseCommon";
-import { CreateUserBody, LoginUserBody, User } from "../models/User";
+import {
+  CreateUserBody,
+  LoginUserBody,
+  ResetPasswordBody,
+  SendMailForgotPasswordBody,
+  User,
+} from "../models/User";
 import { UserService } from "../service/user.service";
 
 // @OpenAPI({
@@ -35,6 +41,16 @@ export class UserController {
   @Post("/auth/logout")
   public logoutUser(@CurrentUser() user: User): Promise<IResponseSuccess> {
     return this.userService.logoutUser(user.userId);
+  }
+
+  @Post("/auth/send-mail-forgot-password")
+  public sendMailForgotPassword(@Body() body: SendMailForgotPasswordBody) {
+    return this.userService.sendMailForgotPassword(body);
+  }
+
+  @Post("/auth/reset-password")
+  public resetPassword(@Body() body: ResetPasswordBody) {
+    return this.userService.resetPassword(body);
   }
 
   @Authorized(["USER"])

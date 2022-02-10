@@ -85,7 +85,6 @@ export class BaseUser {
 
 export class CreateUserBody extends BaseUser {
   @IsNotEmpty()
-  @Min(PASSWORD_MIN_LENGTH)
   public password: string;
 }
 
@@ -95,4 +94,20 @@ export class LoginUserBody {
   public mail: string;
   @IsNotEmpty()
   public password: string;
+}
+
+export class SendMailForgotPasswordBody {
+  @IsNotEmpty()
+  @IsEmail()
+  public mail: string;
+}
+
+export class ResetPasswordBody {
+  @IsNotEmpty()
+  @IsEmail()
+  public mail: string;
+  @IsNotEmpty()
+  public otp: string;
+  @IsNotEmpty()
+  public newPassword: string;
 }

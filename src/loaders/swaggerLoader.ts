@@ -7,7 +7,7 @@ import { UserController } from "../api/controllers/user.controller";
 import express from "express";
 
 import { env } from "../env";
-import { authorizationChecker } from "../api/auth/authorizationChecker";
+import { authorizationChecker } from "../auth/authorizationChecker";
 
 export const swaggerLoader = (expressApp: express.Express) => {
   const schemas = validationMetadatasToSchemas({

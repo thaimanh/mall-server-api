@@ -20,3 +20,12 @@ export const TOKEN_STATUS = {
   INVALID: 0,
   VALID: 1,
 } as const;
+
+export const OTP_STATUS = {
+  INVALID: 0,
+  VALID: 1,
+} as const;
+
+export const OTP_EXPIRES_IN = Number(process.env.OTP_EXPIRES_IN);
+
+export const OTP_LENGTH = 6;

@@ -1,15 +1,23 @@
 import { validate, ValidationError } from "class-validator";
 import STT from "http-status";
 import { HttpError } from "routing-controllers";
+import { sendMail } from "../../shared/mailer";
 import { Service } from "typeDI";
 import { ILike } from "typeorm";
 import { OrmRepository } from "typeorm-typedi-extensions";
 import * as uuid from "uuid";
 import { MEMBER_TYPE, TOKEN_STATUS } from "../../shared/constant";
-import { compareHash } from "../../shared/function";
+import { compareHash, hashMd5 } from "../../shared/function";
 import { IUserOrder, USER_SORT_MODE } from "../Interface/Order";
 import { IResponseCommon } from "../Interface/ResponseCommon";
-import { CreateUserBody, LoginUserBody, User } from "../models/User";
+import {
+  CreateUserBody,
+  LoginUserBody,
+  ResetPasswordBody,
+  SendMailForgotPasswordBody,
+  User,
+} from "../models/User";
+import { OtpRepository } from "../repositories/Otp";
 import { TokenRepository } from "../repositories/Token";
 import { UserRepository } from "../repositories/User";
 
@@ -29,8 +37,9 @@ const order: { [id: string]: IUserOrder } = {
 export class UserService {
   constructor(
     @OrmRepository() private userRepository: UserRepository,
-    @OrmRepository() private tokenRepository: TokenRepository
-  ) { }
+    @OrmRepository() private tokenRepository: TokenRepository,
+    @OrmRepository() private otpRepository: OtpRepository
+  ) {}
   public async registerUser(body: CreateUserBody): Promise<User> {
     const validationRes: Array<ValidationError> = await validate(body);
     if (validationRes.length > 0) throw validationRes;
@@ -96,17 +105,103 @@ export class UserService {
     }
   }
 
-  public async resetPassword(userId: string) {
-    
+  public async resetPassword(body: ResetPasswordBody) {
+    const validationRes: Array<ValidationError> = await validate(body);
+    if (validationRes.length > 0) throw validationRes;
+
+    const mail = body.mail;
+    const otp = body.otp;
+    const newPassword = body.newPassword;
+    const user = await this.userRepository.findOne({
+      where: { mail: String(mail).toLowerCase() },
+    });
+    if (!user) {
+      throw new HttpError(STT.BAD_REQUEST, "User not found");
+    }
+
+    const otpData = await this.otpRepository.verifyOtp(
+      otp,
+      user.userId,
+      MEMBER_TYPE.USER
+    );
+    if (!otpData) {
+      throw new HttpError(STT.INTERNAL_SERVER_ERROR, "Otp invalid");
+    }
+
+    if (otpData && new Date(otpData.expiresAt).getTime() < Date.now()) {
+      throw new HttpError(STT.INTERNAL_SERVER_ERROR, "Otp invalid");
+    }
+
+    const queryRunner = this.userRepository.queryRunner;
+    await queryRunner.startTransaction();
+    await Promise.all([
+      this.userRepository.update(
+        { userId: user.userId },
+        this.userRepository.create({ password: hashMd5(newPassword) })
+      ),
+      this.tokenRepository.update(
+        {
+          memberCd: user.userId,
+          memberType: MEMBER_TYPE.USER,
+          status: TOKEN_STATUS.VALID,
+        },
+        { status: TOKEN_STATUS.INVALID }
+      ),
+      this.otpRepository.revokeOtp(otpData.serial),
+    ])
+      .then(async () => {
+        await queryRunner.commitTransaction();
+        const mailContent = `
+        <div style="padding: 10px; background-color: #003375">
+            <div style="padding: 10px; background-color: white;">
+                <h4 style="color: #0085ff">Reset password success</h4>
+            </div>
+        </div>
+    `;
+        sendMail(mail, mailContent);
+      })
+      .catch(async (err) => {
+        await queryRunner.rollbackTransaction();
+        throw err;
+      })
+      .finally(async () => {
+        await queryRunner.release();
+      });
   }
 
-  public async sendMail(email: string) {
+  public async sendMailForgotPassword(body: SendMailForgotPasswordBody) {
+    const validationRes: Array<ValidationError> = await validate(body);
+    if (validationRes.length > 0) throw validationRes;
 
+    try {
+      const mail = body.mail;
+      const user = await this.userRepository.findOne({
+        where: { mail: String(mail).toLowerCase() },
+      });
+      if (!user) {
+        throw new HttpError(STT.BAD_REQUEST, "User not found");
+      }
+
+      const { otp: otpCode } = await this.otpRepository.newOtp(
+        user.userId,
+        MEMBER_TYPE.USER
+      );
+      const mailContent = `
+        <div style="padding: 10px; background-color: #003375">
+            <div style="padding: 10px; background-color: white;">
+                <h4 style="color: #0085ff">Reset password</h4>
+                <span style="color: black">Click link to reset your password: http://localhost:3000/api/user/auth/reset-password?otp=${otpCode}</span>
+            </div>
+        </div>
+    `;
+      sendMail(mail, mailContent);
+    } catch (error) {
+      console.log(error);
+      throw new HttpError(STT.INTERNAL_SERVER_ERROR, "Send mail failed");
+    }
   }
 
-  public async changePassword(userId: string) {
-
-  }
+  public async changePassword(userId: string) {}
 
   public async getDetailUser(userId: string) {
     const user = await this.userRepository.findOne({ userId: userId });

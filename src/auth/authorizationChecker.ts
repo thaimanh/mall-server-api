@@ -1,8 +1,8 @@
 import { Action } from "routing-controllers";
-import { IObject, MEMBER_TYPE } from "../../shared/constant";
-import { TokenRepository } from "../repositories/Token";
+import { IObject, MEMBER_TYPE } from "../shared/constant";
+import { TokenRepository } from "../api/repositories/Token";
 import { getCustomRepository } from "typeorm";
-import { bindLocals } from "../../shared/function";
+import { bindLocals } from "../shared/function";
 
 export async function authorizationChecker(
   action: Action,

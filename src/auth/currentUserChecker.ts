@@ -1,7 +1,7 @@
 import { decode } from "jsonwebtoken";
 import { Action } from "routing-controllers";
 import { getCustomRepository } from "typeorm";
-import { UserRepository } from "../repositories/User";
+import { UserRepository } from "../api/repositories/User";
 
 export async function currentUserChecker(action: Action) {
   const token = action.request.headers["authorization"];
