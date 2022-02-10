@@ -11,8 +11,8 @@ import {
   IResponseCommon,
   IResponseSuccess,
 } from "src/api/Interface/ResponseCommon";
-import { CreateUserBody, LoginUserBody, User } from "../../models/User";
-import { UserService } from "../../service/user.service";
+import { CreateUserBody, LoginUserBody, User } from "../models/User";
+import { UserService } from "../service/user.service";
 
 // @OpenAPI({
 //   security: [{ authorization: [] }],
@@ -32,25 +32,26 @@ export class UserController {
     return this.userService.registerUser(body);
   }
 
-  // @Post("/auth/logout")
-  // public logoutUser(@CurrentUser() user: User): Promise<IResponseSuccess> {
-  //   return this.userService.logoutUser(user.userId);
-  // }
+  @Post("/auth/logout")
+  public logoutUser(@CurrentUser() user: User): Promise<IResponseSuccess> {
+    return this.userService.logoutUser(user.userId);
+  }
 
   @Authorized(["USER"])
   @Get("/detail")
-  getDetailUser(@CurrentUser() user: User) {
-    return user;
+  getDetailUser(@CurrentUser() user: User): Promise<User> {
+    return this.userService.getDetailUser(user.userId);
   }
 
   @Authorized(["USER"])
   @Get("/")
-  getUsers(
+  getListUser(
     @QueryParam("limit") limit: number,
     @QueryParam("offset") offset: number,
     @QueryParam("mail") mail: string,
-    @QueryParam("name") name: string
+    @QueryParam("name") name: string,
+    @QueryParam("sortMode") sortMode: number
   ): Promise<IResponseCommon<User[]>> {
-    return this.userService.getAllUser(name, mail, limit, offset);
+    return this.userService.getListUser(name, mail, limit, offset, sortMode);
   }
 }

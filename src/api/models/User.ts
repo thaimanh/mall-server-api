@@ -1,5 +1,5 @@
 import { Exclude } from "class-transformer";
-import { IsEmail, IsNotEmpty, IsNumber } from "class-validator";
+import { IsEmail, IsNotEmpty, IsNumber, Min } from "class-validator";
 import {
   Column,
   CreateDateColumn,
@@ -22,24 +22,19 @@ export class User {
   @PrimaryColumn({ name: "user_id", nullable: false })
   public userId: string;
 
-  @IsNotEmpty()
   @Column({ name: "surname", nullable: false })
   public surname: string;
 
-  @IsNotEmpty()
   @Column()
   @Exclude()
   public password: string;
 
-  @IsNotEmpty()
   @Column()
   public lastname: string;
 
-  @IsNotEmpty()
   @Column()
   public birthday: string;
 
-  @IsNotEmpty()
   @Column({ unique: true })
   public mail: string;
 
@@ -66,6 +61,10 @@ export class User {
   }
 }
 
+/**
+ * Validate property
+ */
+const PASSWORD_MIN_LENGTH = 7;
 export class BaseUser {
   @IsNotEmpty()
   public surname: string;
@@ -86,6 +85,7 @@ export class BaseUser {
 
 export class CreateUserBody extends BaseUser {
   @IsNotEmpty()
+  @Min(PASSWORD_MIN_LENGTH)
   public password: string;
 }
 

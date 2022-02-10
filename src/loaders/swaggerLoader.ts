@@ -3,7 +3,7 @@ import { validationMetadatasToSchemas } from "class-validator-jsonschema";
 import { getMetadataArgsStorage } from "routing-controllers";
 import { routingControllersToSpec } from "routing-controllers-openapi";
 import * as swaggerUi from "swagger-ui-express";
-import { UserController } from "../api/controllers/user/user.controller";
+import { UserController } from "../api/controllers/user.controller";
 import express from "express";
 
 import { env } from "../env";

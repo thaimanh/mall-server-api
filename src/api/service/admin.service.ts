@@ -7,86 +7,89 @@ import { OrmRepository } from "typeorm-typedi-extensions";
 import * as uuid from "uuid";
 import { MEMBER_TYPE, TOKEN_STATUS } from "../../shared/constant";
 import { compareHash } from "../../shared/function";
-import { IUserOrder, USER_SORT_MODE } from "../Interface/Order";
+import {
+  ADMIN_SORT_MODE,
+  IUserOrder as IAdminOrder,
+  USER_SORT_MODE,
+} from "../Interface/Order";
 import { IResponseCommon } from "../Interface/ResponseCommon";
-import { CreateUserBody, LoginUserBody, User } from "../models/User";
+import { CreateAdminBody, LoginAdminBody, Admin } from "../models/Admin";
 import { TokenRepository } from "../repositories/Token";
-import { UserRepository } from "../repositories/User";
+import { AdminRepository } from "../repositories/Admin";
 
-const USER_PERPAGE = 100;
-const order: { [id: string]: IUserOrder } = {
-  [USER_SORT_MODE.LAST_NAME_ASC.toString()]: {
+const ADMIN_PER_PAGE = 10;
+const order: { [id: string]: IAdminOrder } = {
+  [ADMIN_SORT_MODE.LAST_NAME_ASC.toString()]: {
     lastname: "ASC",
     createdAt: "ASC",
   },
 
-  [USER_SORT_MODE.LAST_NAME_DESC.toString()]: {
+  [ADMIN_SORT_MODE.LAST_NAME_DESC.toString()]: {
     lastname: "DESC",
     createdAt: "ASC",
   },
 };
 @Service()
-export class UserService {
+export class AdminService {
   constructor(
-    @OrmRepository() private userRepository: UserRepository,
+    @OrmRepository() private adminRepository: AdminRepository,
     @OrmRepository() private tokenRepository: TokenRepository
   ) { }
-  public async registerUser(body: CreateUserBody): Promise<User> {
+  public async registerAdmin(body: CreateAdminBody): Promise<Admin> {
     const validationRes: Array<ValidationError> = await validate(body);
     if (validationRes.length > 0) throw validationRes;
 
     try {
-      const user = await this.userRepository.save(
-        this.userRepository.create({
+      const admin = await this.adminRepository.save(
+        this.adminRepository.create({
           surname: body.surname,
           lastname: body.lastname,
           birthday: body.birthday,
-          gender: body.gender,
           mail: body.mail,
           password: body.password,
-          userId: uuid.v1(),
+          adminId: uuid.v1(),
         })
       );
-      return user;
+      return admin;
     } catch (error) {
       console.log(error);
       throw new HttpError(STT.INTERNAL_SERVER_ERROR, "Register failed");
     }
   }
 
-  public async loginUser(
-    body: LoginUserBody
+  public async loginAdmin(
+    body: LoginAdminBody
   ): Promise<{ accessToken: string }> {
     const validationRes: Array<ValidationError> = await validate(body);
     if (validationRes.length > 0) throw validationRes;
 
-    const user: User = await this.userRepository.findOneOrFail({
+    const admin: Admin = await this.adminRepository.findOneOrFail({
       mail: String(body.mail).trim().toLowerCase(),
     });
 
-    if (!user) {
+    if (!admin) {
       throw new HttpError(STT.BAD_REQUEST, "Login failed");
     }
 
-    if (!compareHash(body.password, user.password)) {
+    if (!compareHash(body.password, admin.password)) {
       throw new HttpError(STT.BAD_REQUEST, "Login failed");
     }
 
-    return this.tokenRepository.newToken(user.userId, MEMBER_TYPE.ADMIN);
+    return this.tokenRepository.newToken(admin.adminId, MEMBER_TYPE.ADMIN);
   }
 
-  public async logoutUser(userId: string) {
+  public async logoutAdmin(adminId: string) {
     try {
-      const user = await this.userRepository.findOne({
-        where: { userId: userId },
+      const admin = await this.adminRepository.findOne({
+        where: { adminId: adminId },
       });
 
-      if (!user) {
-        throw new HttpError(STT.BAD_REQUEST, "User not found");
+      if (!admin) {
+        throw new HttpError(STT.BAD_REQUEST, "Admin not found");
       }
 
       await this.tokenRepository.update(
-        { memberCd: user.userId, memberType: MEMBER_TYPE.ADMIN },
+        { memberCd: admin.adminId, memberType: MEMBER_TYPE.ADMIN },
         this.tokenRepository.create({ status: TOKEN_STATUS.INVALID })
       );
       return { success: true };
@@ -96,34 +99,22 @@ export class UserService {
     }
   }
 
-  public async resetPassword(userId: string) {
-    
-  }
-
-  public async sendMail(email: string) {
-
-  }
-
-  public async changePassword(userId: string) {
-
-  }
-
-  public async getDetailUser(userId: string) {
-    const user = await this.userRepository.findOne({ userId: userId });
-    if (!user) {
-      throw new HttpError(STT.BAD_REQUEST, "User not found");
+  public async getDetailAdmin(adminId: string) {
+    const admin = await this.adminRepository.findOne({ adminId: adminId });
+    if (!admin) {
+      throw new HttpError(STT.BAD_REQUEST, "Admin not found");
     }
-    return user;
+    return admin;
   }
 
-  public async getListUser(
+  public async getListAdmin(
     name?: string,
     mail?: string,
     limit?: number,
     offset?: number,
     sortMode?: number
-  ): Promise<IResponseCommon<User[]>> {
-    limit = limit || USER_PERPAGE;
+  ): Promise<IResponseCommon<Admin[]>> {
+    limit = limit || ADMIN_PER_PAGE;
     offset = offset || 0;
 
     const whereCondition = {};
@@ -137,14 +128,14 @@ export class UserService {
     const orders =
       sortMode && order[sortMode] ? order[sortMode] : { createdAt: "ASC" };
 
-    const users = await this.userRepository.find({
+    const admins = await this.adminRepository.find({
       where: { ...whereCondition },
       order: orders,
       skip: offset,
       take: limit,
     });
-    const total = await this.userRepository.count({ ...whereCondition });
+    const total = await this.adminRepository.count({ ...whereCondition });
 
-    return { result: users, meta: { total, offset, limit } };
+    return { result: admins, meta: { total, offset, limit } };
   }
 }

@@ -16,10 +16,6 @@ import { Token } from "../models/Token";
 import { AdminRepository } from "./Admin";
 import { UserRepository } from "./User";
 
-interface VerifyTokenResult {
-  memberType: number;
-  member: IObject;
-}
 @EntityRepository(Token)
 export class TokenRepository extends Repository<Token> {
   private jwtServiceUser: JwtService;
@@ -41,7 +37,7 @@ export class TokenRepository extends Repository<Token> {
   private mapExpiresTokenWithMember(memberType: number) {
     const obj = {
       [MEMBER_TYPE.ADMIN.toString()]: JWT_EXPIRES_IN_ADMIN,
-      [MEMBER_TYPE.USER.toString()]: JWT_EXPIRES_IN,
+      [MEMBER_TYPE.ADMIN.toString()]: JWT_EXPIRES_IN,
     };
     return obj[memberType] ?? 0;
   }
@@ -49,7 +45,7 @@ export class TokenRepository extends Repository<Token> {
   private getService(memberType: number) {
     const obj = {
       [MEMBER_TYPE.ADMIN.toString()]: this.jwtServiceAdmin,
-      [MEMBER_TYPE.USER.toString()]: this.jwtServiceUser,
+      [MEMBER_TYPE.ADMIN.toString()]: this.jwtServiceUser,
     };
     return obj[memberType];
   }
@@ -82,10 +78,6 @@ export class TokenRepository extends Repository<Token> {
 
   public async verifyToken(token: string, memberType: number) {
     try {
-      const secret = env.app.secretJwt;
-      if (!verify(token, secret)) {
-        throw new BadRequestError("Token invalid");
-      }
       const tokenHash = hashMd5(token);
       const item = await this.getService(memberType).decodeJwt(token);
       const tokenData = await this.findOne({
@@ -106,19 +98,19 @@ export class TokenRepository extends Repository<Token> {
           throw new BadRequestError("Member type not found");
         }
 
-        const memberData = await repo.find({
+        const member = await repo.find({
           where: {
             [codeName]: tokenData.memberCd,
           },
         });
 
-        if (!memberData) {
+        if (!member) {
           throw new BadRequestError(
             `Not found member with code: '${tokenData.memberCd}' - type: '${tokenData.memberType}'`
           );
         }
 
-        return { memberType: tokenData.memberType, memberData };
+        return { memberType: tokenData.memberType, member };
       }
       throw new BadRequestError("Invalid token");
     } catch (error) {
@@ -129,7 +121,7 @@ export class TokenRepository extends Repository<Token> {
 
   public getRepositoryByMembertype(memberType: number) {
     const obj: { [id: string]: { codeName: string; repo: Repository<any> } } = {
-      [MEMBER_TYPE.USER.toString()]: {
+      [MEMBER_TYPE.ADMIN.toString()]: {
         codeName: "userId",
         repo: getCustomRepository(UserRepository),
       },

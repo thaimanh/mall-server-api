@@ -2,6 +2,7 @@ import { Action } from "routing-controllers";
 import { IObject, MEMBER_TYPE } from "../../shared/constant";
 import { TokenRepository } from "../repositories/Token";
 import { getCustomRepository } from "typeorm";
+import { bindLocals } from "../../shared/function";
 
 export async function authorizationChecker(
   action: Action,
@@ -15,6 +16,7 @@ export async function authorizationChecker(
     if (!result) {
       return false;
     }
+    bindLocals(action.request, result)
     return true;
   } catch (error) {
     console.log(error);

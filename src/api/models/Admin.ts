@@ -1,5 +1,5 @@
 import { Exclude } from "class-transformer";
-import { IsNotEmpty } from "class-validator";
+import { IsEmail, IsNotEmpty, Min } from "class-validator";
 import {
   Column,
   CreateDateColumn,
@@ -22,24 +22,19 @@ export class Admin {
   @PrimaryColumn({ name: "admin_id", nullable: false })
   public adminId: string;
 
-  @IsNotEmpty()
   @Column({ name: "surname", nullable: false })
   public surname: string;
 
-  @IsNotEmpty()
   @Column()
   @Exclude()
   public password: string;
 
-  @IsNotEmpty()
   @Column()
   public lastname: string;
 
-  @IsNotEmpty()
   @Column()
   public birthday: string;
 
-  @IsNotEmpty()
   @Column({ unique: true })
   public mail: string;
 
@@ -64,4 +59,34 @@ export class Admin {
   public async hashPassword(): Promise<void> {
     this.password = Admin.hashPassword(this.password);
   }
+}
+
+const PASSWORD_MIN_LENGTH = 7;
+export class BaseUser {
+  @IsNotEmpty()
+  public surname: string;
+
+  @IsNotEmpty()
+  public lastname: string;
+
+  @IsNotEmpty()
+  @IsEmail()
+  public mail: string;
+
+  @IsNotEmpty()
+  public birthday: string;
+}
+
+export class CreateAdminBody extends BaseUser {
+  @IsNotEmpty()
+  @Min(PASSWORD_MIN_LENGTH)
+  public password: string;
+}
+
+export class LoginAdminBody {
+  @IsNotEmpty()
+  @IsEmail()
+  public mail: string;
+  @IsNotEmpty()
+  public password: string;
 }
