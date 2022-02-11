@@ -70,4 +70,13 @@ export class UserController {
   ): Promise<IResponseCommon<User[]>> {
     return this.userService.getListUser(name, mail, limit, offset, sortMode);
   }
+
+  @Authorized(["USER"])
+  @Get("/")
+  updateUser(
+    @CurrentUser() user: User,
+    @Body() body: CreateUserBody
+  ): Promise<User> {
+    return this.userService.updateUser(body, user.userId);
+  }
 }

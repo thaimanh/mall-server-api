@@ -12,7 +12,7 @@ import {
   IResponseCommon,
   IResponseSuccess,
 } from "src/api/Interface/ResponseCommon";
-import express from 'express'
+import express from "express";
 import { Admin, CreateAdminBody, LoginAdminBody } from "../models/Admin";
 import { AdminService } from "../service/admin.service";
 import { getLocals } from "../../shared/function";
@@ -22,7 +22,7 @@ import { getLocals } from "../../shared/function";
 // })
 @Controller("/admin")
 export class AdminController {
-  constructor(private adminService: AdminService) { }
+  constructor(private adminService: AdminService) {}
   @Post("/auth/login")
   public loginAdmin(
     @Body() body: LoginAdminBody
@@ -37,14 +37,14 @@ export class AdminController {
 
   @Post("/auth/logout")
   public logoutAdmin(@Req() req: express.Request): Promise<IResponseSuccess> {
-    const admin: Admin = getLocals(req, 'member')
+    const admin: Admin = getLocals(req, "member");
     return this.adminService.logoutAdmin(admin.adminId);
   }
 
   @Authorized(["ADMIN"])
   @Get("/detail")
   getDetailAdmin(@Req() req: express.Request): Promise<Admin> {
-    const admin: Admin = getLocals(req, 'member')
+    const admin: Admin = getLocals(req, "member");
     return this.adminService.getDetailAdmin(admin.adminId);
   }
 
@@ -58,5 +58,14 @@ export class AdminController {
     @QueryParam("sortMode") sortMode: number
   ): Promise<IResponseCommon<Admin[]>> {
     return this.adminService.getListAdmin(name, mail, limit, offset, sortMode);
+  }
+
+  @Authorized(["ADMIN"])
+  @Get("/")
+  updateUser(
+    @Req() req: express.Request,
+    @Body() body: CreateUserBody
+  ): Promise<User> {
+    return this.userService.updateUser(body, user.userId);
   }
 }

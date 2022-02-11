@@ -242,4 +242,20 @@ export class UserService {
 
     return { result: users, meta: { total, offset, limit } };
   }
+
+  public async updateUser(body: CreateUserBody, userId: string): Promise<User> {
+    const user = await this.userRepository.findOne({ userId: userId });
+    if (!user) {
+      throw new HttpError(STT.BAD_REQUEST, "User not found");
+    }
+
+    try {
+      this.userRepository.merge(user, body);
+      const result = await this.userRepository.save(user);
+      return result;
+    } catch (error) {
+      console.log(error);
+      throw new HttpError(STT.INTERNAL_SERVER_ERROR, "Update user error");
+    }
+  }
 }
