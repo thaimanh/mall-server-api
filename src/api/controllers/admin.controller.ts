@@ -62,10 +62,11 @@ export class AdminController {
 
   @Authorized(["ADMIN"])
   @Get("/")
-  updateUser(
+  updateAdmin(
     @Req() req: express.Request,
-    @Body() body: CreateUserBody
-  ): Promise<User> {
-    return this.userService.updateUser(body, user.userId);
+    @Body() body: CreateAdminBody
+  ): Promise<Admin> {
+    const admin: Admin = getLocals(req, "member");
+    return this.adminService.updateAdmin(body, admin.adminId);
   }
 }

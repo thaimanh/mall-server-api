@@ -34,7 +34,7 @@ export class AdminService {
   constructor(
     @OrmRepository() private adminRepository: AdminRepository,
     @OrmRepository() private tokenRepository: TokenRepository
-  ) { }
+  ) {}
   public async registerAdmin(body: CreateAdminBody): Promise<Admin> {
     const validationRes: Array<ValidationError> = await validate(body);
     if (validationRes.length > 0) throw validationRes;
@@ -137,5 +137,24 @@ export class AdminService {
     const total = await this.adminRepository.count({ ...whereCondition });
 
     return { result: admins, meta: { total, offset, limit } };
+  }
+
+  public async updateAdmin(
+    body: CreateAdminBody,
+    adminId: string
+  ): Promise<Admin> {
+    const admin = await this.adminRepository.findOne({ adminId: adminId });
+    if (!admin) {
+      throw new HttpError(STT.BAD_REQUEST, "Admin not found");
+    }
+
+    try {
+      this.adminRepository.merge(admin, body);
+      const result = await this.adminRepository.save(admin);
+      return result;
+    } catch (error) {
+      console.log(error);
+      throw new HttpError(STT.INTERNAL_SERVER_ERROR, "Update admin error");
+    }
   }
 }
