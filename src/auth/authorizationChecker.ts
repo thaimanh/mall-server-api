@@ -12,11 +12,11 @@ export async function authorizationChecker(
     const memberType = parseScopesToMemberTypes(role);
     const token = action.request.headers["authorization"];
     const tokenRepository = getCustomRepository(TokenRepository);
-    const result = await tokenRepository.verifyToken(token, memberType[0]);
+    const result = await tokenRepository.verifyToken(token, memberType);
     if (!result) {
       return false;
     }
-    bindLocals(action.request, result)
+    bindLocals(action.request, result);
     return true;
   } catch (error) {
     console.log(error);

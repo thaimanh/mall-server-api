@@ -76,14 +76,18 @@ export class TokenRepository extends Repository<Token> {
     return { accessToken: token };
   }
 
-  public async verifyToken(token: string, memberType: number) {
+  public async verifyToken(token: string, memberType: number[]) {
     try {
       const tokenHash = hashMd5(token);
-      const item = await this.getService(memberType).decodeJwt(token);
+      const items = await Promise.all(
+        memberType.map((memberType) => {
+          return this.getService(memberType).decodeJwt(token);
+        })
+      );
       const tokenData = await this.findOne({
         where: {
-          memberCd: item.memberCd,
-          memberType: memberType,
+          memberCd: ["in", items.map((i) => i.memberCd)],
+          memberType: ["in", memberType],
           token: tokenHash,
         },
       });
@@ -93,7 +97,9 @@ export class TokenRepository extends Repository<Token> {
         tokenData.status === TOKEN_STATUS.VALID &&
         new Date(tokenData.expiresAt).getTime() > Date.now()
       ) {
-        const { codeName, repo } = this.getRepositoryByMembertype(memberType);
+        const { codeName, repo } = this.getRepositoryByMembertype(
+          tokenData.memberType
+        );
         if (!codeName && !repo) {
           throw new BadRequestError("Member type not found");
         }

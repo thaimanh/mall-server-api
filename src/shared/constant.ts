@@ -29,3 +29,8 @@ export const OTP_STATUS = {
 export const OTP_EXPIRES_IN = Number(process.env.OTP_EXPIRES_IN);
 
 export const OTP_LENGTH = 6;
+
+export const FLG_VALUE = {
+  OFF: 0,
+  ON: 1,
+};

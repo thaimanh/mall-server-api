@@ -7,18 +7,19 @@ import { OrmRepository } from "typeorm-typedi-extensions";
 import * as uuid from "uuid";
 import { MEMBER_TYPE, TOKEN_STATUS } from "../../shared/constant";
 import { compareHash } from "../../shared/function";
-import {
-  ADMIN_SORT_MODE,
-  IUserOrder as IAdminOrder,
-  USER_SORT_MODE,
-} from "../Interface/Order";
+import { ADMIN_SORT_MODE, IOrder, USER_SORT_MODE } from "../Interface/Order";
 import { IResponseCommon } from "../Interface/ResponseCommon";
-import { CreateAdminBody, LoginAdminBody, Admin } from "../models/Admin";
+import {
+  CreateAdminBody,
+  UpdateAdminBody,
+  LoginAdminBody,
+  Admin,
+} from "../models/Admin";
 import { TokenRepository } from "../repositories/Token";
 import { AdminRepository } from "../repositories/Admin";
 
 const ADMIN_PER_PAGE = 10;
-const order: { [id: string]: IAdminOrder } = {
+const order: { [id: string]: IOrder } = {
   [ADMIN_SORT_MODE.LAST_NAME_ASC.toString()]: {
     lastname: "ASC",
     createdAt: "ASC",
@@ -148,7 +149,7 @@ export class AdminService {
   }
 
   public async updateAdmin(
-    body: CreateAdminBody,
+    body: UpdateAdminBody,
     adminId: string
   ): Promise<Admin> {
     const admin = await this.adminRepository.findOne({ adminId: adminId });

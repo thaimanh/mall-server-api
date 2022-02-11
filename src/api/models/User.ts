@@ -111,3 +111,5 @@ export class ResetPasswordBody {
   @IsNotEmpty()
   public newPassword: string;
 }
+
+export class UpdateUserBody extends BaseUser {}

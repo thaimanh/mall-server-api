@@ -90,3 +90,5 @@ export class LoginAdminBody {
   @IsNotEmpty()
   public password: string;
 }
+
+export class UpdateAdminBody extends BaseUser {}

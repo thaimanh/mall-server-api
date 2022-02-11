@@ -1,5 +1,4 @@
-import { Exclude } from "class-transformer";
-import { IsEmail, IsNotEmpty, IsNumber, Min } from "class-validator";
+import { IsNotEmpty } from "class-validator";
 import {
   Column,
   CreateDateColumn,
@@ -22,7 +21,7 @@ export class Item {
   @Column()
   public provider: string;
 
-  @Column()
+  @Column({ name: "del_flg" })
   public delFlg: number;
 
   @CreateDateColumn({
@@ -39,3 +38,18 @@ export class Item {
 /**
  * Validate property
  */
+
+export class BaseItemBody {
+  @IsNotEmpty()
+  public title: string;
+
+  @IsNotEmpty()
+  public price: number;
+
+  @IsNotEmpty()
+  public provider: string;
+}
+
+export class CreateItemBody extends BaseItemBody {}
+
+export class UpdateItemBody extends BaseItemBody {}

@@ -13,13 +13,15 @@ import {
   IResponseSuccess,
 } from "src/api/Interface/ResponseCommon";
 import express from "express";
-import { Admin, CreateAdminBody, LoginAdminBody } from "../models/Admin";
+import {
+  Admin,
+  CreateAdminBody,
+  LoginAdminBody,
+  UpdateAdminBody,
+} from "../models/Admin";
 import { AdminService } from "../service/admin.service";
 import { getLocals } from "../../shared/function";
 
-// @OpenAPI({
-//   security: [{ authorization: [] }],
-// })
 @Controller("/admin")
 export class AdminController {
   constructor(private adminService: AdminService) {}
@@ -64,7 +66,7 @@ export class AdminController {
   @Get("/")
   updateAdmin(
     @Req() req: express.Request,
-    @Body() body: CreateAdminBody
+    @Body() body: UpdateAdminBody
   ): Promise<Admin> {
     const admin: Admin = getLocals(req, "member");
     return this.adminService.updateAdmin(body, admin.adminId);

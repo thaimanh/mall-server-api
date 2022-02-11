@@ -8,13 +8,14 @@ import { OrmRepository } from "typeorm-typedi-extensions";
 import * as uuid from "uuid";
 import { MEMBER_TYPE, TOKEN_STATUS } from "../../shared/constant";
 import { compareHash, hashMd5 } from "../../shared/function";
-import { IUserOrder, USER_SORT_MODE } from "../Interface/Order";
+import { IOrder, USER_SORT_MODE } from "../Interface/Order";
 import { IResponseCommon } from "../Interface/ResponseCommon";
 import {
   CreateUserBody,
   LoginUserBody,
   ResetPasswordBody,
   SendMailForgotPasswordBody,
+  UpdateUserBody,
   User,
 } from "../models/User";
 import { OtpRepository } from "../repositories/Otp";
@@ -22,7 +23,7 @@ import { TokenRepository } from "../repositories/Token";
 import { UserRepository } from "../repositories/User";
 
 const USER_PERPAGE = 100;
-const order: { [id: string]: IUserOrder } = {
+const order: { [id: string]: IOrder } = {
   [USER_SORT_MODE.LAST_NAME_ASC.toString()]: {
     lastname: "ASC",
     createdAt: "ASC",
@@ -251,7 +252,7 @@ export class UserService {
     return { result: users, meta: { total, offset, limit } };
   }
 
-  public async updateUser(body: CreateUserBody, userId: string): Promise<User> {
+  public async updateUser(body: UpdateUserBody, userId: string): Promise<User> {
     const user = await this.userRepository.findOne({ userId: userId });
     if (!user) {
       throw new HttpError(STT.BAD_REQUEST, "User not found");

@@ -9,6 +9,8 @@ import { UserController } from "../api/controllers/user.controller";
 import { authorizationChecker } from "../auth/authorizationChecker";
 import StatusCodes from "http-status";
 import { currentUserChecker } from "../auth/currentUserChecker";
+import { AdminController } from "../api/controllers/admin.controller";
+import { ItemController } from "../api/controllers/item.controller";
 
 export const expressLoader = () => {
   let app = express();
@@ -17,7 +19,7 @@ export const expressLoader = () => {
     classTransformer: true,
     routePrefix: env.app.routePrefix,
     defaultErrorHandler: false,
-    controllers: [UserController],
+    controllers: [UserController, AdminController, ItemController],
     authorizationChecker,
     currentUserChecker,
   });
