@@ -12,7 +12,7 @@ Install [Node.js and NPM](https://nodejs.org/en/download/)
 Install yarn globally
 
 ```bash
-yarn global add yarn
+npm i yarn -g
 ```
 
 Install a PostgresSQL database.
