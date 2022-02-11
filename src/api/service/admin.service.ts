@@ -39,6 +39,14 @@ export class AdminService {
     const validationRes: Array<ValidationError> = await validate(body);
     if (validationRes.length > 0) throw validationRes;
 
+    // Check exist admin
+    const admin = await this.adminRepository.findOne({
+      where: { mail: body.mail },
+    });
+    if (admin) {
+      throw new HttpError(STT.BAD_REQUEST, "Admin have already exist");
+    }
+
     try {
       const admin = await this.adminRepository.save(
         this.adminRepository.create({

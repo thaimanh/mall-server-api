@@ -35,7 +35,7 @@ export class Admin {
   @Column()
   public birthday: string;
 
-  @Column({ unique: true })
+  @Column()
   public mail: string;
 
   @Column({ nullable: true })

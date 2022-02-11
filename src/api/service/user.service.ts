@@ -44,6 +44,14 @@ export class UserService {
     const validationRes: Array<ValidationError> = await validate(body);
     if (validationRes.length > 0) throw validationRes;
 
+    // Check exist user
+    const user = await this.userRepository.findOne({
+      where: { mail: body.mail },
+    });
+    if (user) {
+      throw new HttpError(STT.BAD_REQUEST, "User have already exist");
+    }
+
     try {
       const user = await this.userRepository.save(
         this.userRepository.create({
