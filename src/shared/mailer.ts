@@ -1,15 +1,16 @@
 import mailer from "nodemailer";
+import { env } from "../env";
 
 export const sendMail = (mail: string, content: string) => {
   const transporter = mailer.createTransport({
     service: "gmail",
     auth: {
-      user: "thaikhacmanh1998@gmail.com",
-      pass: "manhprox30",
+      user: env.app.userMail,
+      pass: env.app.passwordMail,
     },
   });
   const mainOptions = {
-    from: "thaikhacmanh1998@gmail.com",
+    from: env.app.userMail,
     to: mail,
     subject: "Reset password",
     html: content,

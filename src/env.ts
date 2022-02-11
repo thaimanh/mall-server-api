@@ -27,6 +27,8 @@ export const env = {
   isTest: process.env.NODE_ENV === "test",
   isDevelopment: process.env.NODE_ENV === "development",
   app: {
+    userMail: getOsEnv("USER_MAIL"),
+    passwordMail: getOsEnv("PASSWORD_MAIL"),
     secretJwt: getOsEnv("SECRET_JWT"),
     expiresIn: getOsEnv("JWT_EXPIRES_IN"),
     expiresInAdmin: getOsEnv("JWT_EXPIRES_IN_ADMIN"),
