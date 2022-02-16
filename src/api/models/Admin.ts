@@ -1,5 +1,5 @@
 import { Exclude } from "class-transformer";
-import { IsEmail, IsNotEmpty, Min } from "class-validator";
+import { IsEmail, IsNotEmpty, Min, MinLength } from "class-validator";
 import {
   Column,
   CreateDateColumn,
@@ -75,11 +75,13 @@ export class BaseUser {
 
   @IsNotEmpty()
   public birthday: string;
+
+  public gender: number;
 }
 
 export class CreateAdminBody extends BaseUser {
   @IsNotEmpty()
-  @Min(PASSWORD_MIN_LENGTH)
+  @MinLength(PASSWORD_MIN_LENGTH)
   public password: string;
 }
 

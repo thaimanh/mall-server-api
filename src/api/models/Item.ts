@@ -3,9 +3,11 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryColumn,
   UpdateDateColumn,
 } from "typeorm";
+import { OrderDetail } from "./OderDetail";
 
 @Entity("m_item")
 export class Item {
@@ -15,7 +17,7 @@ export class Item {
   @Column()
   public title: string;
 
-  @Column()
+  @Column({ type: "decimal" })
   public price: number;
 
   @Column()
@@ -33,6 +35,9 @@ export class Item {
     name: "updated_at",
   })
   public updatedAt: Date;
+
+  @OneToMany(() => OrderDetail, (orderDetail) => orderDetail.item)
+  public orderDetail: OrderDetail[];
 }
 
 /**

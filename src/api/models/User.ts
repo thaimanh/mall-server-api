@@ -1,5 +1,5 @@
 import { Exclude } from "class-transformer";
-import { IsEmail, IsNotEmpty, IsNumber, Min } from "class-validator";
+import { IsEmail, IsNotEmpty, IsNumber, Min, MinLength } from "class-validator";
 import {
   Column,
   CreateDateColumn,
@@ -7,8 +7,10 @@ import {
   PrimaryColumn,
   UpdateDateColumn,
   BeforeInsert,
+  OneToMany,
 } from "typeorm";
 import crypto from "crypto";
+import { Order } from "./Order";
 
 @Entity("m_user")
 export class User {
@@ -40,6 +42,9 @@ export class User {
 
   @Column({ nullable: true })
   public gender: number;
+
+  @OneToMany(() => Order, (order) => order.user, { cascade: true })
+  orders: Order[];
 
   @CreateDateColumn({
     name: "created_at",
@@ -85,6 +90,7 @@ export class BaseUser {
 
 export class CreateUserBody extends BaseUser {
   @IsNotEmpty()
+  @MinLength(PASSWORD_MIN_LENGTH)
   public password: string;
 }
 

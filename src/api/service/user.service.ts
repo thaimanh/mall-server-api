@@ -90,7 +90,7 @@ export class UserService {
       throw new HttpError(STT.BAD_REQUEST, "Login failed");
     }
 
-    return this.tokenRepository.newToken(user.userId, MEMBER_TYPE.ADMIN);
+    return this.tokenRepository.newToken(user.userId, MEMBER_TYPE.USER);
   }
 
   public async logoutUser(userId: string) {
@@ -104,7 +104,7 @@ export class UserService {
       }
 
       await this.tokenRepository.update(
-        { memberCd: user.userId, memberType: MEMBER_TYPE.ADMIN },
+        { memberCd: user.userId, memberType: MEMBER_TYPE.USER },
         this.tokenRepository.create({ status: TOKEN_STATUS.INVALID })
       );
       return { success: true };

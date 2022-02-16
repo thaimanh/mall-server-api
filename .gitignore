@@ -1,9 +1,10 @@
-# @w3tec
-
 # Logs #
 /logs
 *.log
 *.log*
+
+# Logs #
+.vscode
 
 # Node files #
 node_modules/

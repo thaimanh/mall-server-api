@@ -57,6 +57,7 @@ export class AdminService {
           mail: body.mail,
           password: body.password,
           adminId: uuid.v1(),
+          gender: body.gender,
         })
       );
       return admin;

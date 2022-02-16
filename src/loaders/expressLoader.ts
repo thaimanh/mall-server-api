@@ -11,6 +11,7 @@ import StatusCodes from "http-status";
 import { currentUserChecker } from "../auth/currentUserChecker";
 import { AdminController } from "../api/controllers/admin.controller";
 import { ItemController } from "../api/controllers/item.controller";
+import { OrderController } from "../api/controllers/order.controller";
 
 export const expressLoader = () => {
   let app = express();
@@ -19,7 +20,12 @@ export const expressLoader = () => {
     classTransformer: true,
     routePrefix: env.app.routePrefix,
     defaultErrorHandler: false,
-    controllers: [UserController, AdminController, ItemController],
+    controllers: [
+      UserController,
+      AdminController,
+      ItemController,
+      OrderController,
+    ],
     authorizationChecker,
     currentUserChecker,
   });

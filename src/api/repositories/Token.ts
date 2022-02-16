@@ -1,6 +1,6 @@
 import { verify } from "jsonwebtoken";
 import { BadRequestError } from "routing-controllers";
-import { EntityRepository, getCustomRepository, Repository } from "typeorm";
+import { EntityRepository, getCustomRepository, In, Repository } from "typeorm";
 import * as uuid from "uuid";
 import { env } from "../../env";
 import {
@@ -37,7 +37,7 @@ export class TokenRepository extends Repository<Token> {
   private mapExpiresTokenWithMember(memberType: number) {
     const obj = {
       [MEMBER_TYPE.ADMIN.toString()]: JWT_EXPIRES_IN_ADMIN,
-      [MEMBER_TYPE.ADMIN.toString()]: JWT_EXPIRES_IN,
+      [MEMBER_TYPE.USER.toString()]: JWT_EXPIRES_IN,
     };
     return obj[memberType] ?? 0;
   }
@@ -45,7 +45,7 @@ export class TokenRepository extends Repository<Token> {
   private getService(memberType: number) {
     const obj = {
       [MEMBER_TYPE.ADMIN.toString()]: this.jwtServiceAdmin,
-      [MEMBER_TYPE.ADMIN.toString()]: this.jwtServiceUser,
+      [MEMBER_TYPE.USER.toString()]: this.jwtServiceUser,
     };
     return obj[memberType];
   }
@@ -86,8 +86,8 @@ export class TokenRepository extends Repository<Token> {
       );
       const tokenData = await this.findOne({
         where: {
-          memberCd: ["in", items.map((i) => i.memberCd)],
-          memberType: ["in", memberType],
+          memberCd: In(items.map((i) => i.memberCd)),
+          memberType: In(memberType),
           token: tokenHash,
         },
       });
@@ -104,7 +104,7 @@ export class TokenRepository extends Repository<Token> {
           throw new BadRequestError("Member type not found");
         }
 
-        const member = await repo.find({
+        const member = await repo.findOne({
           where: {
             [codeName]: tokenData.memberCd,
           },
@@ -127,7 +127,7 @@ export class TokenRepository extends Repository<Token> {
 
   public getRepositoryByMembertype(memberType: number) {
     const obj: { [id: string]: { codeName: string; repo: Repository<any> } } = {
-      [MEMBER_TYPE.ADMIN.toString()]: {
+      [MEMBER_TYPE.USER.toString()]: {
         codeName: "userId",
         repo: getCustomRepository(UserRepository),
       },
