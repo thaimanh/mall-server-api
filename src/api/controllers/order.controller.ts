@@ -18,6 +18,7 @@ import { OrderService } from "../service/order.service";
 import { getLocals } from "../../shared/function";
 import { User } from "../models/User";
 import { CreateOrderDetailBody, OrderDetail } from "../models/OderDetail";
+import { Order } from "../models/Order";
 
 // @OpenAPI({
 //   security: [{ authorization: [] }],
@@ -27,15 +28,24 @@ export class OrderController {
   constructor(private orderService: OrderService) {}
 
   @Authorized(["USER"])
-  @Get("/order-by-user")
-  getOrderByUser(
+  @Get("/d/:orderId")
+  getOrderDetail(
     @Req() req: express.Request,
-    @QueryParam("title") title?: string,
+    @Param("orderId") orderId: string
+  ): Promise<IResponseCommon<Order>> {
+    const user: User = getLocals(req, "member");
+    return this.orderService.getOrderDetail(user.userId, orderId);
+  }
+
+  @Authorized(["USER"])
+  @Get("/")
+  getListOrder(
+    @Req() req: express.Request,
     @QueryParam("limit") limit?: number,
     @QueryParam("offset") offset?: number
-  ): Promise<IResponseCommon<OrderDetail[]>> {
+  ): Promise<IResponseCommon<Order[]>> {
     const user: User = getLocals(req, "member");
-    return this.orderService.getOrderByUser(user.userId, title, limit, offset);
+    return this.orderService.getListOrder(user.userId, limit, offset);
   }
 
   @Authorized(["USER"])

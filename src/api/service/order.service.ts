@@ -6,7 +6,7 @@ import { ILike } from "typeorm";
 import { OrmRepository } from "typeorm-typedi-extensions";
 import * as uuid from "uuid";
 import { FLG_VALUE } from "../../shared/constant";
-import { IResponseSuccess } from "../Interface/ResponseCommon";
+import { IResponseCommon, IResponseSuccess } from "../Interface/ResponseCommon";
 import { CreateOrderDetailBody } from "../models/OderDetail";
 import { Order } from "../models/Order";
 import { ItemRepository } from "../repositories/Item";
@@ -65,39 +65,38 @@ export class OrderService {
     }
   }
 
-  public async getOrderByUser(
+  public async getListOrder(
     userId: string,
-    title?: string,
     limit?: number,
-    offset?: number,
-    sortMode?: number
-  ) {
+    offset?: number
+  ): Promise<IResponseCommon<Order[]>> {
     limit = limit || ORDER_PERPAGE;
     offset = offset || 0;
 
-    const whereCondition = {};
-    if (title) {
-      whereCondition["title"] = ILike(`%${title}%`);
-    }
+    const orders = await this.orderRepository.find({
+      where: { userId: userId, delFlg: FLG_VALUE.OFF },
+      skip: offset,
+      take: limit,
+    });
+    const total = await this.orderRepository.count({
+      userId: userId,
+      delFlg: FLG_VALUE.OFF,
+    });
 
-    const builder = this.orderDetailRepository
-      .createQueryBuilder("orderDetail")
+    return { result: orders, meta: { total, offset, limit } };
+  }
+
+  public async getOrderDetail(userId: string, orderId: string) {
+    const result = await this.orderRepository
+      .createQueryBuilder("order")
+      .leftJoinAndSelect("order.orderDetail", "orderDetail")
       .leftJoinAndSelect("orderDetail.item", "item")
-      .leftJoinAndSelect("orderDetail.order", "order")
       .where("order.userId = :userId", { userId })
-      .andWhere("order.delFlg = :delFlg", { delFlg: FLG_VALUE.OFF });
+      .andWhere("order.orderId = :orderId", { orderId })
+      .andWhere("order.delFlg = :delFlg", { delFlg: FLG_VALUE.OFF })
+      .getOne();
 
-    whereCondition[title] && builder.andWhere("item.title = :title", { title });
-
-    const builderClone = builder.clone();
-
-    const result = await builder
-      .orderBy("orderDetail.price", "DESC")
-      .limit(limit)
-      .offset(offset)
-      .getMany();
-    const total = await builderClone.getCount();
-    return { result: result, meta: { total, offset, limit } };
+    return { result: result, meta: {} };
   }
 
   public async cancelOrder(
