@@ -20,6 +20,9 @@ export class Item {
   @Column({ type: "decimal" })
   public price: number;
 
+  @Column({ name: "available_item", default: 100 })
+  public availableItem: number;
+
   @Column()
   public provider: string;
 
@@ -53,6 +56,9 @@ export class BaseItemBody {
 
   @IsNotEmpty()
   public provider: string;
+
+  @IsNotEmpty()
+  public availableItem: number;
 }
 
 export class CreateItemBody extends BaseItemBody {}

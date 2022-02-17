@@ -37,6 +37,7 @@ export class ItemService {
           title: body.title,
           price: body.price,
           provider: body.provider,
+          availableItem: body.availableItem,
           delFlg: FLG_VALUE.OFF,
         })
       );

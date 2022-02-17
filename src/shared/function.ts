@@ -1,6 +1,7 @@
 import crypto from "crypto";
 import express from "express";
 import { IObject } from "./constant";
+import { dateToDateStr } from "./dateUtil";
 
 export const compareHash = (password: string = "", strHash: string) => {
   const hashed = hashMd5(password);
@@ -26,4 +27,18 @@ export const bindLocals = (req: express.Request, data = {}): void => {
 export const getLocals = (req: express.Request, key?: string): any => {
   const locals = req.res?.locals || {};
   return key ? locals[String(key)] : locals;
+};
+
+export const objArrToDict = <T>(arr: T[], indexKey: keyof T) => {
+  const normalizedObject: any = {};
+  for (let i = 0; i < arr.length; i++) {
+    const value = arr[i][indexKey];
+    if (typeof value === "string" || typeof value === "number") {
+      normalizedObject[value.toString()] = arr[i];
+    }
+    if (value instanceof Date) {
+      normalizedObject[dateToDateStr(value)] = arr[i];
+    }
+  }
+  return normalizedObject as { [key: string]: T };
 };

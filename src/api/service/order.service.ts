@@ -1,14 +1,17 @@
 import { validate, ValidationError } from "class-validator";
 import STT from "http-status";
 import { HttpError } from "routing-controllers";
+import { objArrToDict } from "../../shared/function";
 import { Service } from "typeDI";
-import { ILike } from "typeorm";
+import { getConnection, ILike, In } from "typeorm";
 import { OrmRepository } from "typeorm-typedi-extensions";
 import * as uuid from "uuid";
 import { FLG_VALUE } from "../../shared/constant";
 import { IResponseCommon, IResponseSuccess } from "../Interface/ResponseCommon";
-import { CreateOrderDetailBody } from "../models/OderDetail";
+import { Item } from "../models/Item";
+import { CreateOrderDetailBody, OrderDetail } from "../models/OderDetail";
 import { Order } from "../models/Order";
+import { User } from "../models/User";
 import { ItemRepository } from "../repositories/Item";
 import { OrderRepository } from "../repositories/Order";
 import { OrderDetailRepository } from "../repositories/OrderDetail";
@@ -30,6 +33,9 @@ export class OrderService {
     const validationRes: Array<ValidationError> = await validate(body);
     if (validationRes.length > 0) throw validationRes;
 
+    const queryRunner = getConnection().createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
     try {
       const total = body.reduce((pV, cV) => {
         return cV.price * cV.quantity + pV;
@@ -52,16 +58,42 @@ export class OrderService {
         delFlg: FLG_VALUE.OFF,
       });
 
-      const instanceUser = this.userRepository.create({
+      const instanceUser = queryRunner.manager.getRepository(User).create({
         userId: userId,
         orders: [instanceOrder],
       });
-      await this.userRepository.save(instanceUser);
 
+      // Save order
+      await queryRunner.manager.getRepository(User).save(instanceUser);
+
+      // Update avaliable item
+      const item = await this.itemRepository.find({
+        where: {
+          itemId: In(body.map((i) => i.itemId)),
+        },
+      });
+      const itemDict = objArrToDict(item, "itemId");
+      const promises: Promise<any>[] = [];
+      for (const orderDetail of body) {
+        const promise = queryRunner.manager.getRepository(Item).update(
+          { itemId: orderDetail.itemId },
+          {
+            availableItem:
+              itemDict[orderDetail.itemId].availableItem - orderDetail.quantity,
+          }
+        );
+        promises.push(promise);
+      }
+      await Promise.all(promises);
+
+      await queryRunner.commitTransaction();
       return { success: true };
     } catch (error) {
+      await queryRunner.rollbackTransaction();
       console.log(error);
       throw new HttpError(STT.INTERNAL_SERVER_ERROR, "Create order failed");
+    } finally {
+      await queryRunner.release();
     }
   }
 
@@ -120,4 +152,6 @@ export class OrderService {
       throw new HttpError(STT.INTERNAL_SERVER_ERROR, "Cancel order error");
     }
   }
+
+  // public checkAvailableItem(item: OrderDetail[]) {}
 }
