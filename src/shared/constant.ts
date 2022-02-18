@@ -34,3 +34,16 @@ export const FLG_VALUE = {
   OFF: 0,
   ON: 1,
 };
+
+export const INTERVAL_DATE = {
+  MONTH: 1,
+  YEAR: 2,
+};
+
+export const ORDER = {
+  ASC: 1,
+  DESC: 2,
+};
+
+export const NON_CAMEL_SPLIT_REGEX = /([-_][a-z0-9])/gi;
+export const NON_SNAKE_SPLIT_REGEX = /[A-Z]/g;

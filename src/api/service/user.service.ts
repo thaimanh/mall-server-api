@@ -3,7 +3,7 @@ import STT from "http-status";
 import { HttpError } from "routing-controllers";
 import { sendMail } from "../../shared/mailer";
 import { Service } from "typeDI";
-import { ILike } from "typeorm";
+import { getConnection, ILike } from "typeorm";
 import { OrmRepository } from "typeorm-typedi-extensions";
 import * as uuid from "uuid";
 import { MEMBER_TYPE, TOKEN_STATUS } from "../../shared/constant";
@@ -21,6 +21,8 @@ import {
 import { OtpRepository } from "../repositories/Otp";
 import { TokenRepository } from "../repositories/Token";
 import { UserRepository } from "../repositories/User";
+import { Token } from "../models/Token";
+import { Otp } from "../models/Otp";
 
 const USER_PERPAGE = 100;
 const order: { [id: string]: IOrder } = {
@@ -78,7 +80,7 @@ export class UserService {
     const validationRes: Array<ValidationError> = await validate(body);
     if (validationRes.length > 0) throw validationRes;
 
-    const user: User = await this.userRepository.findOneOrFail({
+    const user: User = await this.userRepository.findOne({
       mail: String(body.mail).trim().toLowerCase(),
     });
 
@@ -140,15 +142,18 @@ export class UserService {
     if (otpData && new Date(otpData.expiresAt).getTime() < Date.now()) {
       throw new HttpError(STT.INTERNAL_SERVER_ERROR, "Otp invalid");
     }
-
-    const queryRunner = this.userRepository.queryRunner;
+    const queryRunner = getConnection().createQueryRunner();
+    await queryRunner.connect();
     await queryRunner.startTransaction();
+
     await Promise.all([
-      this.userRepository.update(
-        { userId: user.userId },
-        this.userRepository.create({ password: hashMd5(newPassword) })
-      ),
-      this.tokenRepository.update(
+      queryRunner.manager
+        .getRepository(User)
+        .update(
+          { userId: user.userId },
+          this.userRepository.create({ password: hashMd5(newPassword) })
+        ),
+      queryRunner.manager.getRepository(Token).update(
         {
           memberCd: user.userId,
           memberType: MEMBER_TYPE.USER,
@@ -156,7 +161,9 @@ export class UserService {
         },
         { status: TOKEN_STATUS.INVALID }
       ),
-      this.otpRepository.revokeOtp(otpData.serial),
+      queryRunner.manager
+        .getCustomRepository(OtpRepository)
+        .revokeOtp(otpData.serial),
     ])
       .then(async () => {
         await queryRunner.commitTransaction();
@@ -171,7 +178,7 @@ export class UserService {
       })
       .catch(async (err) => {
         await queryRunner.rollbackTransaction();
-        throw err;
+        throw new HttpError(STT.BAD_REQUEST, "Reset failed");
       })
       .finally(async () => {
         await queryRunner.release();

@@ -1,3 +1,4 @@
+import { Exclude } from "class-transformer";
 import { IsNotEmpty } from "class-validator";
 import {
   Column,
@@ -71,3 +72,14 @@ export class CreateOrderDetailBody extends BaseOrderDetailBody {
 }
 
 export class UpdateOrderDetailBody extends BaseOrderDetailBody {}
+
+export class StatisticItemByTimeData extends BaseOrderDetailBody {
+  @Exclude()
+  public price: number;
+  @IsNotEmpty()
+  public title: string;
+  @IsNotEmpty()
+  public provider: string;
+  @IsNotEmpty()
+  public item_id: string;
+}

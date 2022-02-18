@@ -58,7 +58,7 @@ export class OrderService {
         delFlg: FLG_VALUE.OFF,
       });
 
-      const instanceUser = queryRunner.manager.getRepository(User).create({
+      const instanceUser = this.userRepository.create({
         userId: userId,
         orders: [instanceOrder],
       });
@@ -153,5 +153,7 @@ export class OrderService {
     }
   }
 
-  // public checkAvailableItem(item: OrderDetail[]) {}
+  public checkAvailableItem(item: OrderDetail[]) {
+    
+  }
 }

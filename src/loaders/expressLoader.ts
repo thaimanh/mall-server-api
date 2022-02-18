@@ -12,6 +12,7 @@ import { currentUserChecker } from "../auth/currentUserChecker";
 import { AdminController } from "../api/controllers/admin.controller";
 import { ItemController } from "../api/controllers/item.controller";
 import { OrderController } from "../api/controllers/order.controller";
+import { StatisticController } from "../api/controllers/statistic.controller";
 
 export const expressLoader = () => {
   let app = express();
@@ -25,6 +26,7 @@ export const expressLoader = () => {
       AdminController,
       ItemController,
       OrderController,
+      StatisticController,
     ],
     authorizationChecker,
     currentUserChecker,

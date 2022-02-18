@@ -1,6 +1,10 @@
 import crypto from "crypto";
 import express from "express";
-import { IObject } from "./constant";
+import {
+  IObject,
+  NON_CAMEL_SPLIT_REGEX,
+  NON_SNAKE_SPLIT_REGEX,
+} from "./constant";
 import { dateToDateStr } from "./dateUtil";
 
 export const compareHash = (password: string = "", strHash: string) => {
@@ -41,4 +45,42 @@ export const objArrToDict = <T>(arr: T[], indexKey: keyof T) => {
     }
   }
   return normalizedObject as { [key: string]: T };
+};
+
+type ObjectTransform =
+  | unknown
+  | IObject<ObjectTransform>
+  | Array<ObjectTransform>;
+
+export const objToCamel = (obj: ObjectTransform): ObjectTransform => {
+  if (obj instanceof Array) return obj.map(objToCamel);
+  if (!(obj instanceof Object)) return obj;
+  const newObj: IObject<ObjectTransform> = {};
+  Object.keys(obj).forEach((k) => {
+    newObj[strToCamel(k)] = objToCamel((<IObject<ObjectTransform>>obj)[k]);
+  });
+  return newObj;
+};
+
+export const objToSnake = (obj: ObjectTransform): ObjectTransform => {
+  if (obj instanceof Array) return obj.map(objToSnake);
+  if (!(obj instanceof Object)) return obj;
+  const newObj: IObject<ObjectTransform> = {};
+  Object.keys(obj).forEach((k) => {
+    newObj[strToSnake(k)] = objToSnake((<IObject<ObjectTransform>>obj)[k]);
+  });
+  return newObj;
+};
+
+export const strToCamel = (str: string): string => {
+  return str.replace(NON_CAMEL_SPLIT_REGEX, (letter) =>
+    letter.toUpperCase().replace(/-|_/g, "")
+  );
+};
+
+export const strToSnake = (str: string): string => {
+  return str.replace(
+    NON_SNAKE_SPLIT_REGEX,
+    (letter) => `_${letter.toLowerCase()}`
+  );
 };

@@ -115,6 +115,7 @@ export class ResetPasswordBody {
   @IsNotEmpty()
   public otp: string;
   @IsNotEmpty()
+  @MinLength(PASSWORD_MIN_LENGTH)
   public newPassword: string;
 }
 
