@@ -30,8 +30,7 @@ export class OrderService {
     body: CreateOrderDetailBody[],
     userId: string
   ): Promise<IResponseSuccess> {
-    const validationRes: Array<ValidationError> = await validate(body);
-    if (validationRes.length > 0) throw validationRes;
+    await this.vaildateOrder(body);
 
     const queryRunner = getConnection().createQueryRunner();
     await queryRunner.connect();
@@ -75,16 +74,9 @@ export class OrderService {
       const itemDict = objArrToDict(item, "itemId");
       const promises: Promise<any>[] = [];
       for (const orderDetail of body) {
-        const promise = queryRunner.manager.getRepository(Item).update(
-          { itemId: orderDetail.itemId },
-          {
-            availableItem:
-              itemDict[orderDetail.itemId].availableItem - orderDetail.quantity,
-          }
-        );
+        const promise = queryRunner.manager.getRepository(Item).query("");
         promises.push(promise);
       }
-      await Promise.all(promises);
 
       await queryRunner.commitTransaction();
       return { success: true };
@@ -153,7 +145,32 @@ export class OrderService {
     }
   }
 
-  public checkAvailableItem(item: OrderDetail[]) {
-    
+  public async vaildateOrder(orderDetails: CreateOrderDetailBody[]) {
+    // Validate body order
+    const validationRes: Array<ValidationError> = await validate(orderDetails);
+    if (validationRes.length > 0) throw validationRes;
+
+    // Check avaliable item
+    const items = await this.itemRepository.find({
+      where: {
+        itemId: In(orderDetails.map((i) => i.itemId)),
+      },
+    });
+    const itemDict = objArrToDict(items, "itemId");
+    const result = [];
+    for (const orderDetail of orderDetails) {
+      if (
+        itemDict[orderDetail.itemId].availableItem - orderDetail.quantity <
+        0
+      ) {
+        throw new HttpError(STT.BAD_REQUEST, "Out of stock");
+      }
+      result.push({
+        itemId: orderDetail.itemId,
+        availableItem:
+          itemDict[orderDetail.itemId].availableItem - orderDetail.quantity,
+      });
+    }
+    return result;
   }
 }

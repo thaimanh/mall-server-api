@@ -20,7 +20,7 @@ export class Order {
   @Column({ name: "user_id", nullable: true })
   public userId: string;
 
-  @Column()
+  @Column({ type: "decimal" })
   public total: number;
 
   @Column({ name: "del_flg" })
@@ -43,7 +43,6 @@ export class Order {
 
   @ManyToOne(() => User, (user) => user.orders, {
     createForeignKeyConstraints: false,
-    onDelete: "CASCADE",
   })
   @JoinColumn({ name: "user_id" })
   public user: User;

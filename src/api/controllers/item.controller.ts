@@ -4,11 +4,13 @@ import {
   Controller,
   Delete,
   Get,
+  JsonController,
   Param,
   Post,
   Put,
   QueryParam,
 } from "routing-controllers";
+import { OpenAPI } from "routing-controllers-openapi";
 import {
   IResponseCommon,
   IResponseSuccess,
@@ -19,7 +21,10 @@ import { ItemService } from "../service/item.service";
 // @OpenAPI({
 //   security: [{ authorization: [] }],
 // })
-@Controller("/item")
+@OpenAPI({
+  security: [{ authorization: [] }],
+})
+@JsonController("/item")
 export class ItemController {
   constructor(private itemService: ItemService) {}
 

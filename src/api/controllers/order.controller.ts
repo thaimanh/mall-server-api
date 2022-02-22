@@ -4,6 +4,7 @@ import {
   Controller,
   Delete,
   Get,
+  JsonController,
   Param,
   Post,
   QueryParam,
@@ -17,13 +18,14 @@ import {
 import { OrderService } from "../service/order.service";
 import { getLocals } from "../../shared/function";
 import { User } from "../models/User";
-import { CreateOrderDetailBody, OrderDetail } from "../models/OderDetail";
+import { CreateOrderDetailBody } from "../models/OderDetail";
 import { Order } from "../models/Order";
+import { OpenAPI } from "routing-controllers-openapi";
 
-// @OpenAPI({
-//   security: [{ authorization: [] }],
-// })
-@Controller("/order")
+@OpenAPI({
+  security: [{ authorization: [] }],
+})
+@JsonController("/order")
 export class OrderController {
   constructor(private orderService: OrderService) {}
 

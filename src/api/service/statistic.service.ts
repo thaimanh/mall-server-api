@@ -27,7 +27,8 @@ export class StatisticService {
       USING(item_id) 
       WHERE EXTRACT(${interval} from od.created_at) = ${value}
       GROUP BY item_id, title, provider
-      ORDER BY quantity ${order}`);
+      ORDER BY quantity ${order}
+       `);
     return result;
   }
 

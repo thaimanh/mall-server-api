@@ -4,9 +4,11 @@ import {
   Controller,
   CurrentUser,
   Get,
+  JsonController,
   Post,
   QueryParam,
 } from "routing-controllers";
+import { OpenAPI } from "routing-controllers-openapi";
 import {
   IResponseCommon,
   IResponseSuccess,
@@ -20,10 +22,7 @@ import {
 } from "../models/User";
 import { UserService } from "../service/user.service";
 
-// @OpenAPI({
-//   security: [{ authorization: [] }],
-// })
-@Controller("/user")
+@JsonController("/user")
 export class UserController {
   constructor(private userService: UserService) {}
   @Post("/auth/login")
@@ -43,7 +42,7 @@ export class UserController {
     return this.userService.logoutUser(user.userId);
   }
 
-  @Post("/auth/send-mail-forgot-password")
+  @Post("/auth/send-mail-forgot-password ")
   public sendMailForgotPassword(@Body() body: SendMailForgotPasswordBody) {
     return this.userService.sendMailForgotPassword(body);
   }
@@ -53,13 +52,19 @@ export class UserController {
     return this.userService.resetPassword(body);
   }
 
+  @OpenAPI({
+    security: [{ authorization: [] }],
+  })
   @Authorized(["USER"])
   @Get("/detail")
   getDetailUser(@CurrentUser() user: User): Promise<User> {
     return this.userService.getDetailUser(user.userId);
   }
 
-  @Authorized(["USER"])
+  @Authorized(["ADMIN"])
+  @OpenAPI({
+    security: [{ authorization: [] }],
+  })
   @Get("/")
   getListUser(
     @QueryParam("limit") limit: number,

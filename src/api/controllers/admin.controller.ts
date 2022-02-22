@@ -4,6 +4,7 @@ import {
   Controller,
   CurrentUser,
   Get,
+  JsonController,
   Post,
   QueryParam,
   Req,
@@ -21,8 +22,12 @@ import {
 } from "../models/Admin";
 import { AdminService } from "../service/admin.service";
 import { getLocals } from "../../shared/function";
+import { OpenAPI } from "routing-controllers-openapi";
 
-@Controller("/admin")
+@OpenAPI({
+  security: [{ authorization: [] }],
+})
+@JsonController("/admin")
 export class AdminController {
   constructor(private adminService: AdminService) {}
   @Post("/auth/login")

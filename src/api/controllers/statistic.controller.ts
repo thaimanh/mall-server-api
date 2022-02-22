@@ -1,11 +1,21 @@
-import { Authorized, Controller, Get, QueryParam } from "routing-controllers";
+import {
+  Authorized,
+  Controller,
+  Get,
+  JsonController,
+  QueryParam,
+} from "routing-controllers";
 import { StatisticService } from "../service/statistic.service";
 import { StatisticItemByTimeData } from "../models/OderDetail";
+import { OpenAPI } from "routing-controllers-openapi";
 
 // @OpenAPI({
 //   security: [{ authorization: [] }],
 // })
-@Controller("/statistic")
+@OpenAPI({
+  security: [{ authorization: [] }],
+})
+@JsonController("/statistic")
 export class StatisticController {
   constructor(private statisticService: StatisticService) {}
 

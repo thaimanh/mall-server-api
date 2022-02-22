@@ -23,9 +23,10 @@ export const swaggerLoader = (expressApp: express.Express) => {
       components: {
         schemas,
         securitySchemes: {
-          basicAuth: {
-            type: "http",
-            scheme: "basic",
+          authorization: {
+            type: "apiKey",
+            in: "header",
+            name: "authorization",
           },
         },
       },
