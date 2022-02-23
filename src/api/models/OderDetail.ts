@@ -66,9 +66,15 @@ export class BaseOrderDetailBody {
   public price: number;
 }
 
-export class CreateOrderDetailBody extends BaseOrderDetailBody {
+export class CreateOrderDetailBody {
   @IsNotEmpty()
   public itemId: string;
+
+  @IsNotEmpty()
+  public quantity: number;
+
+  @IsNotEmpty()
+  public price: number;
 }
 
 export class UpdateOrderDetailBody extends BaseOrderDetailBody {}

@@ -66,19 +66,19 @@ export class OrderService {
       await queryRunner.manager.getRepository(User).save(instanceUser);
 
       // Update avaliable item
-      const item = await this.itemRepository.find({
-        where: {
-          itemId: In(body.map((i) => i.itemId)),
-        },
-      });
-      const itemDict = objArrToDict(item, "itemId");
       const promises: Promise<any>[] = [];
       for (const orderDetail of body) {
-        const promise = queryRunner.manager.getRepository(Item).query("");
+        const promise = queryRunner.manager.getRepository(Item).query(
+          `UPDATE m_item
+           SET available_item = available_item - ${orderDetail.quantity} 
+           WHERE item_id = '${orderDetail.itemId}'`
+        );
         promises.push(promise);
       }
+      await Promise.all(promises);
 
       await queryRunner.commitTransaction();
+
       return { success: true };
     } catch (error) {
       await queryRunner.rollbackTransaction();
